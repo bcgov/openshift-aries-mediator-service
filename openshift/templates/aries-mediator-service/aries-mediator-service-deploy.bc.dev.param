@@ -1,0 +1,60 @@
+#=========================================================
+# OpenShift template parameters for:
+# Component: .
+# Template File: ../openshift/templates/api/api-deploy.yaml
+#=========================================================
+# NAME=api
+# ROLE=api
+# AGENT_ROLE=agent
+# FRONTEND_ROLE=frontend
+# DATABASE_ROLE=db
+# SEARCH_ENGINE_ROLE=search-engine
+# MSG_QUEUE_ROLE=msg-queue
+# NAMESPACE=4a9599
+# SUFFIX=-bc
+# APP_NAME=orgbook
+# APP_GROUP=aries-vcr
+# IMAGE_NAMESPACE=4a9599-tools
+# DATABASE_HOST=db
+# DATABASE_ENGINE=postgresql
+# APP_FILE=app-vonx.py
+# APP_CONFIG=
+# APP_MODULE=api_indy.tob_anchor.boot:init_app
+# #DJANGO_SECRET_KEY=[\w]{50}
+# DJANGO_DEBUG=False
+# DJANGO_LOG_LEVEL=WARN
+# SOLR_HOST=search-engine
+# SOLR_CORE_NAME=credential_registry
+# SKIP_INDEXING_ON_STARTUP=all
+# ENABLE_REALTIME_INDEXING=1
+# ENABLE_SUGGESTER_REBUILD=
+# RTI_WAIT_TIME=5
+# RTI_MAX_SOLR_BATCH=25
+# RTI_RAISE_ERRORS=false
+# RTI_ABORT_ON_ERRORS=true
+TAG_NAME=dev
+# MSG_QUEUE_HOST=msg-queue
+# THEME=bcgov
+# USE_AUTHENTICATION=
+# USER_ID=[a-zA-Z_][a-zA-Z0-9_]{10}
+# USER_PASSWORD=[a-zA-Z0-9_~!@#$%^&*()-=<>,.?;:|]{16}
+# ADMIN_USER_ID=[a-zA-Z_][a-zA-Z0-9_]{10}
+# ADMIN_PASSWORD=[a-zA-Z0-9_~!@#$%^&*()-=<>,.?;:|]{16}
+APPLICATION_URL=https://dev.orgbook.gov.bc.ca
+# EMAIL_SETTINGS_STORE_NAME=email-settings
+# FEEDBACK_TARGET_EMAIL=
+# SMTP_SERVER_ADDRESS=
+# TRACE_EVENTS=false
+# RECORD_TIMINGS=false
+SP_TRACKING_APP_ID=orgbook_api_dev
+# API_VERSION_ROUTING_MIDDLEWARE=vcr_server.middleware.api_tracking.SnowplowTrackingMiddleware
+# SP_TRACKING_EMITTER=spt.apps.gov.bc.ca
+# DEMO_SITE=True
+# AGENT_HOST=agent
+# AGENT_ADMIN_PORT=8024
+# MIN_REPLICAS=2
+# MAX_REPLICAS=16
+# CPU_REQUEST=150m
+# CPU_LIMIT=300m
+# MEMORY_REQUEST=256Mi
+# MEMORY_LIMIT=512Mi

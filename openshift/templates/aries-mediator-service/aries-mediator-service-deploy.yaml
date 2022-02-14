@@ -1,0 +1,406 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name: ${NAME}${SUFFIX}-deployment-template
+  annotations:
+    description: Deployment template for a Node server connected to Aries agent.
+    tags: node
+    iconClass: icon-node
+objects:
+
+  - kind: NetworkPolicy
+    apiVersion: networking.k8s.io/v1
+    metadata:
+      name: ${NAME}${SUFFIX}
+      labels:
+        name: ${NAME}${SUFFIX}
+        app: ${APP_NAME}${SUFFIX}
+        app-group: ${APP_GROUP}
+        role: ${ROLE}
+        env: ${TAG_NAME}
+    spec:
+      description: |
+        Allow the agent and frontend to access the controller.
+      ingress:
+        - from:
+            - podSelector:
+                matchLabels:
+                  role: ${AGENT_ROLE}
+                  app: ${APP_NAME}${SUFFIX}
+                  env: ${TAG_NAME}
+              namespaceSelector:
+                matchLabels:
+                  name: ${NAMESPACE}
+                  environment: ${TAG_NAME}
+          ports:
+            - protocol: TCP
+              port: 8080
+      podSelector:
+        matchLabels:
+          role: ${ROLE}
+          app: ${APP_NAME}${SUFFIX}
+          env: ${TAG_NAME}
+
+  - kind: Secret
+    apiVersion: v1
+    metadata:
+      name: ${EMAIL_SETTINGS_STORE_NAME}${SUFFIX}
+      labels:
+        name: ${NAME}${SUFFIX}
+        app: ${APP_NAME}${SUFFIX}
+        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
+        app-group: ${APP_GROUP}
+        role: ${ROLE}
+        env: ${TAG_NAME}
+    stringData:
+      target-email: ${FEEDBACK_TARGET_EMAIL}
+      smtp-host: ${SMTP_SERVER_ADDRESS}
+    type: Opaque
+
+  - kind: Secret
+    apiVersion: v1
+    metadata:
+      name: ${NAME}${SUFFIX}
+      labels:
+        name: ${NAME}${SUFFIX}
+        app: ${APP_NAME}${SUFFIX}
+        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
+        app-group: ${APP_GROUP}
+        role: ${ROLE}
+        env: ${TAG_NAME}
+    stringData:
+      api-user: ${USER_ID}
+      api-password: ${USER_PASSWORD}
+      admin-user: ${ADMIN_USER_ID}
+      admin-password: ${ADMIN_PASSWORD}
+    type: Opaque
+
+  - kind: Service
+    apiVersion: v1
+    metadata:
+      name: ${NAME}${SUFFIX}
+      annotations:
+        description: Exposes and load balances the application pods
+        service.alpha.openshift.io/dependencies: '[{"name": "${DATABASE_HOST}", "kind": "Service"},{"name": "${SOLR_HOST}", "kind": "Service"}]'
+      labels:
+        name: ${NAME}${SUFFIX}
+        app: ${APP_NAME}${SUFFIX}
+        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
+        app-group: ${APP_GROUP}
+        role: ${ROLE}
+        env: ${TAG_NAME}
+    spec:
+      ports:
+        - name: 8080-tcp
+          port: 8080
+          protocol: TCP
+          targetPort: 8080
+      selector:
+        name: ${NAME}${SUFFIX}
+
+  - kind: DeploymentConfig
+    apiVersion: v1
+    metadata:
+      name: ${NAME}${SUFFIX}
+      labels:
+        name: ${NAME}${SUFFIX}
+        app: ${APP_NAME}${SUFFIX}
+        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
+        app-group: ${APP_GROUP}
+        role: ${ROLE}
+        env: ${TAG_NAME}
+    spec:
+      strategy:
+        type: Rolling
+      triggers:
+        - type: ImageChange
+          imageChangeParams:
+            automatic: true
+            containerNames:
+              - ${NAME}${SUFFIX}
+            from:
+              kind: ImageStreamTag
+              namespace: ${IMAGE_NAMESPACE}
+              name: ${NAME}:${TAG_NAME}
+        - type: ConfigChange
+      replicas: 1
+      selector:
+        name: ${NAME}${SUFFIX}
+      template:
+        metadata:
+          name: ${NAME}${SUFFIX}
+          labels:
+            name: ${NAME}${SUFFIX}
+            app: ${APP_NAME}${SUFFIX}
+            app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
+            app-group: ${APP_GROUP}
+            role: ${ROLE}
+            env: ${TAG_NAME}
+        spec:
+          containers:
+            - name: ${NAME}${SUFFIX}
+              image: " "
+              ports:
+                - containerPort: 8080
+                  protocol: TCP
+              readinessProbe:
+                failureThreshold: 5
+                periodSeconds: 30
+                initialDelaySeconds: 3
+                timeoutSeconds: 40
+                httpGet:
+                  path: /health
+                  port: 8080
+              livenessProbe:
+                failureThreshold: 5
+                periodSeconds: 60
+                initialDelaySeconds: 30
+                timeoutSeconds: 40
+                httpGet:
+                  path: /health
+                  port: 8080
+              env:
+                - name: APP_FILE
+                  value: ${APP_FILE}
+                - name: APP_CONFIG
+                  value: ${APP_CONFIG}
+                - name: APP_MODULE
+                  value: ${APP_MODULE}
+                - name: DATABASE_SERVICE_NAME
+                  value: ${DATABASE_HOST}${SUFFIX}
+                - name: DATABASE_ENGINE
+                  value: ${DATABASE_ENGINE}
+                - name: DATABASE_NAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${DATABASE_HOST}${SUFFIX}
+                      key: database-name
+                - name: DATABASE_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${DATABASE_HOST}${SUFFIX}
+                      key: database-user
+                - name: DATABASE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${DATABASE_HOST}${SUFFIX}
+                      key: database-password
+                - name: DEMO_SITE
+                  value: ${DEMO_SITE}
+                - name: DJANGO_SECRET_KEY
+                  value: ${DJANGO_SECRET_KEY}
+                - name: DJANGO_DEBUG
+                  value: ${DJANGO_DEBUG}
+                - name: DJANGO_LOG_LEVEL
+                  value: ${DJANGO_LOG_LEVEL}
+                - name: SOLR_SERVICE_NAME
+                  value: ${SOLR_HOST}${SUFFIX}
+                - name: SOLR_CORE_NAME
+                  value: ${SOLR_CORE_NAME}
+                - name: SKIP_INDEXING_ON_STARTUP
+                  value: ${SKIP_INDEXING_ON_STARTUP}
+                - name: ENABLE_REALTIME_INDEXING
+                  value: ${ENABLE_REALTIME_INDEXING}
+                - name: ENABLE_SUGGESTER_REBUILD
+                  value: ${ENABLE_SUGGESTER_REBUILD}
+                - name: RTI_WAIT_TIME
+                  value: ${RTI_WAIT_TIME}
+                - name: RTI_MAX_SOLR_BATCH
+                  value: ${RTI_MAX_SOLR_BATCH}
+                - name: RTI_RAISE_ERRORS
+                  value: ${RTI_RAISE_ERRORS}
+                - name: RTI_ABORT_ON_ERRORS
+                  value: ${RTI_ABORT_ON_ERRORS}
+                - name: THEME
+                  value: ${THEME}
+                - name: APPLICATION_URL
+                  value: ${APPLICATION_URL}
+                - name: RABBITMQ_SVC_NAME
+                  value: ${MSG_QUEUE_HOST}${SUFFIX}
+                - name: RABBITMQ_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${MSG_QUEUE_HOST}${SUFFIX}
+                      key: default-user
+                - name: RABBITMQ_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${MSG_QUEUE_HOST}${SUFFIX}
+                      key: default-password
+                - name: AGENT_ADMIN_URL
+                  value: http://${AGENT_HOST}${SUFFIX}:${AGENT_ADMIN_PORT}
+                - name: AGENT_ADMIN_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${AGENT_HOST}${SUFFIX}
+                      key: admin-api-key
+                - name: USE_AUTHENTICATION
+                  value: ${USE_AUTHENTICATION}
+                - name: USER_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: api-user
+                - name: USER_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: api-password
+                - name: ADMIN_USER_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: admin-user
+                - name: ADMIN_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: admin-password
+                - name: FEEDBACK_TARGET_EMAIL
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${EMAIL_SETTINGS_STORE_NAME}${SUFFIX}
+                      key: target-email
+                - name: SMTP_SERVER_ADDRESS
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${EMAIL_SETTINGS_STORE_NAME}${SUFFIX}
+                      key: smtp-host
+                - name: TRACE_EVENTS
+                  value: ${TRACE_EVENTS}
+                - name: RECORD_TIMINGS
+                  value: ${RECORD_TIMINGS}
+                - name: SP_TRACKING_APP_ID
+                  value: ${SP_TRACKING_APP_ID}
+                - name: API_VERSION_ROUTING_MIDDLEWARE
+                  value: ${API_VERSION_ROUTING_MIDDLEWARE}
+                - name: SP_TRACKING_EMITTER
+                  value: ${SP_TRACKING_EMITTER}
+              resources:
+                requests:
+                  cpu: ${CPU_REQUEST}
+                  memory: ${MEMORY_REQUEST}
+                limits:
+                  cpu: ${CPU_LIMIT}
+                  memory: ${MEMORY_LIMIT}
+
+  - kind: HorizontalPodAutoscaler
+    apiVersion: autoscaling/v1
+    metadata:
+      name: ${NAME}${SUFFIX}
+      labels:
+        name: ${NAME}${SUFFIX}
+        app: ${APP_NAME}${SUFFIX}
+        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
+        app-group: ${APP_GROUP}
+        role: ${ROLE}
+        env: ${TAG_NAME}
+    spec:
+      scaleTargetRef:
+        kind: DeploymentConfig
+        name: ${NAME}${SUFFIX}
+      minReplicas: ${{MIN_REPLICAS}}
+      maxReplicas: ${{MAX_REPLICAS}}
+
+parameters:
+  - name: NAME
+    displayName: Name
+    description: The name assigned to all of the OpenShift resources associated to the server instance.
+    required: true
+    value: api
+  - name: ROLE
+    displayName: Role
+    description: Service Role
+    required: true
+    value: api
+  - name: AGENT_ROLE
+    displayName: Agent Role
+    description: Agent Role
+    required: true
+    value: agent
+  - name: FRONTEND_ROLE
+    displayName: Frontend Role
+    description: Frontend Role
+    required: true
+    value: frontend
+  - name: DATABASE_ROLE
+    displayName: Database Role
+    description: Database Role
+    required: true
+    value: db
+  - name: SEARCH_ENGINE_ROLE
+    displayName: Search Engine Role
+    description: Search Engine Role
+    required: true
+    value: search-engine
+  - name: MSG_QUEUE_ROLE
+    displayName: Message Queue Role
+    description: Message Queue Role
+    required: true
+    value: msg-queue
+  - name: NAMESPACE
+    displayName: The target namespace for the resources.
+    required: true
+    value: 4a9599
+  - name: SUFFIX
+    displayName: Suffix
+    description: A name suffix used for all objects
+    required: false
+    value: -bc
+  - name: APP_NAME
+    displayName: App Name
+    description: Used to group components together in the OpenShift console.
+    required: true
+    value: orgbook
+  - name: APP_GROUP
+    displayName: App Group
+    description: The name assigned to all of the deployments in this project.
+    required: true
+    value: aries-vcr
+  - name: IMAGE_NAMESPACE
+    displayName: Image Namespace
+    required: true
+    description: The namespace of the OpenShift project containing the imagestream for the application.
+    value: 4a9599-tools
+  - name: DATABASE_HOST
+    displayName: Database Service Name
+    description: The name of the database server/service.
+    required: true
+    value: db
+  - name: DATABASE_ENGINE
+    displayName: Database Engine
+    required: true
+    description: "Database engine: postgresql, mysql, or sqlite (default)."
+    value: postgresql
+
+  - name: MIN_REPLICAS
+    displayName: Minimum Replicas
+    description: The minimum number of pods to have running.
+    required: true
+    value: "2"
+  - name: MAX_REPLICAS
+    displayName: Maximum Replicas
+    description: The maximum number of pods to have running.
+    required: true
+    value: "16"
+
+  - name: CPU_REQUEST
+    displayName: Resources CPU Request
+    description: The resources CPU request (in cores) for this build.
+    required: true
+    value: 10m
+  - name: CPU_LIMIT
+    displayName: Resources CPU Limit
+    description: The resources CPU limit (in cores) for this build.
+    required: true
+    value: 300m
+  - name: MEMORY_REQUEST
+    displayName: Resources Memory Request
+    description: The resources Memory request (in Mi, Gi, etc) for this build.
+    required: true
+    value: 10Mi
+  - name: MEMORY_LIMIT
+    displayName: Resources Memory Limit
+    description: The resources Memory limit (in Mi, Gi, etc) for this build.
+    required: true
+    value: 512Mi

@@ -1,0 +1,20 @@
+# Uses the 'testConnection' script from https://github.com/BCDevOps/openshift-developer-tools
+# Example:
+# echo -e "wallet-bc\n agent-bc\n db-bc\n db-oli\n api-bc\n offline-indexer-oli\n frontend-bc\n schema-spy-bc\n search-engine-bc\n search-engine-oli\n msg-queue-bc\n msg-queue-worker-bc"  | xargs -I {} testConnection -n 4a9599-dev -f TestConnections.txt -p {}
+
+google.com:80
+wallet-bc:5432
+db-bc:5432
+db-oli:5432
+agent-bc:8024
+agent-bc:8021
+frontend-bc:8080
+msg-queue-bc:5672
+msg-queue-bc:8080
+msg-queue-bc:15672
+# msg-queue-worker-bc:8080
+api-bc:8080
+offline-indexer-oli:8080
+schema-spy-bc:8080
+search-engine-bc:8983
+search-engine-oli:8983
