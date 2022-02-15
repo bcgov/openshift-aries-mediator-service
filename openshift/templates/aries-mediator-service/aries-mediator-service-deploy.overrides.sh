@@ -15,24 +15,12 @@ fi
 if createOperation; then
   # Randomly generate a set of credentials without asking ...
   printStatusMsg "Creating a set of random user credentials ..."
-  writeParameter "USER_ID" $(generateUsername) "false"
-  writeParameter "USER_PASSWORD" $(generatePassword) "false"
-  writeParameter "ADMIN_USER_ID" $(generateUsername) "false"
-  writeParameter "ADMIN_PASSWORD" $(generatePassword) "false"
-
+  readParameter "API_KEY - Please provide the key for the Controller Admin API.  If left blank, a 32 character long base64 encoded value will be randomly generated using openssl:" API_KEY $(generateKey 32) "false"
   # Get the settings for delivering user feedback to the business
-  readParameter "FEEDBACK_TARGET_EMAIL - Please provide the target email address where user feedback will be sent.  The default is a blank string." FEEDBACK_TARGET_EMAIL "false"
-  readParameter "SMTP_SERVER_ADDRESS - Please provide the address of the outgoing smtp server.  The default is a blank string." SMTP_SERVER_ADDRESS "false"
 else
   # Secrets are removed from the configurations during update operations ...
   printStatusMsg "Update operation detected ...\nSkipping the generation of random user credentials.\nSkipping the prompts for FEEDBACK_TARGET_EMAIL, and SMTP_SERVER_ADDRESS secrets ...\n"
-  writeParameter "USER_ID" "generation_skipped" "false"
-  writeParameter "USER_PASSWORD" "generation_skipped" "false"
-  writeParameter "ADMIN_USER_ID" "generation_skipped" "false"
-  writeParameter "ADMIN_PASSWORD" "generation_skipped" "false"
-
-  writeParameter "FEEDBACK_TARGET_EMAIL" "prompt_skipped" "false"
-  writeParameter "SMTP_SERVER_ADDRESS" "prompt_skipped" "false"
+  writeParameter "API_KEY" "prompt_skipped" "false"
 fi
 
 SPECIALDEPLOYPARMS="--param-file=${_overrideParamFile}"

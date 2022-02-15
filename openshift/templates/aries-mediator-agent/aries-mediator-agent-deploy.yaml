@@ -261,27 +261,29 @@ objects:
                   --outbound-transport ws 
                   --outbound-transport http 
                   --wallet-type indy 
-                  --wallet-storage-type postgres_storage 
+                  --wallet-storage-type postgres_storage
+                  --wallet-storage-config "$(eval echo \"${WALLET_STORAGE_CONFIGURATION}\")"
+                  --wallet-storage-creds "$(eval echo \"${WALLET_STORAGE_CREDENTIALS}\")"
                   --admin 0.0.0.0 ${MEDIATOR_AGENT_HTTP_ADMIN_PORT} 
-                  --${MEDIATOR_AGENT_ADMIN_MODE} 
+                  --admin-api-key ${MEDIATOR_AGENT_ADMIN_MODE} 
                   ${MEDIATOR_CONTROLLER_WEBHOOK}
                   );
               env:
-                - name: POSTGRESQL_HOST
+                - name: POSTGRESQL_WALLET_HOST
                   value: ${WALLET_HOST}${SUFFIX}
-                - name: POSTGRESQL_PORT
+                - name: POSTGRESQL_WALLET_PORT
                   value: ${WALLET_PORT}
-                - name: POSTGRESQL_USER
+                - name: POSTGRESQL_WALLET_USER
                   valueFrom:
                     secretKeyRef:
                       name: ${WALLET_HOST}${SUFFIX}
                       key: database-user
-                - name: POSTGRESQL_PASSWORD
+                - name: POSTGRESQL_WALLET_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       name: ${WALLET_HOST}${SUFFIX}
                       key: database-password
-                - name: POSTGRESQL_ADMIN_PASSWORD
+                - name: POSTGRESQL_WALLET_ADMIN_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       name: ${WALLET_HOST}${SUFFIX}
@@ -291,9 +293,9 @@ objects:
                     secretKeyRef:
                       name: ${NAME}${SUFFIX}
                       key: key
-                - name: ACAPY_WALLET_STORAGE_CONFIG
+                - name: WALLET_STORAGE_CONFIGURATION
                   value: ${ACAPY_WALLET_STORAGE_CONFIG}
-                - name: ACAPY_WALLET_STORAGE_CREDS
+                - name: WALLET_STORAGE_CREDENTIALS
                   value: ${ACAPY_WALLET_STORAGE_CREDS}
                 - name: ACAPY_WALLET_NAME
                   value: ${NAME}${SUFFIX}-wallet
@@ -315,7 +317,7 @@ objects:
                 - name: MEDIATOR_ARG_FILE
                   value: ${MEDIATOR_ARG_FILE}
                 - name: MEDIATOR_CONTROLLER_WEBHOOK
-                  value: ${WEBHOOK_URL}
+                  value: ${MEDIATOR_CONTROLLER_WEBHOOK}
                 - name: LOG_LEVEL
                   value: ${LOG_LEVEL}
                 - name: ACAPY_WALLET_SEED
@@ -462,7 +464,7 @@ parameters:
     displayName: Postgresql Host
     description: The name of the Postgresql deployment
     required: true
-    value: db
+    value: aries-mediator-db
   - name: WALLET_PORT
     displayName: Postgresql Port
     description: The db port of the Postgres deployment
@@ -473,16 +475,21 @@ parameters:
     required: true
     description: Argument file location
     value: ./configs/mediator-auto-accept.yml
+  - name: MEDIATOR_CONTROLLER_WEBHOOK
+    displayName: Controller Webhook
+    required: true
+    description: Controller Webhook
+    value: --webhook-url http://aries-mediator-service:3010/webhooks
   - name: ACAPY_WALLET_STORAGE_CONFIG
     displayName: Wallet Storage Configuration
     required: true
     description: Wallet storage configuration
-    value: '{\"url\":\"${POSTGRESQL_HOST}:${POSTGRESQL_PORT}\",\"wallet_scheme\":\"DatabasePerWallet\"}'
+    value: '{\"url\":\"${POSTGRESQL_WALLET_HOST}:${POSTGRESQL_WALLET_PORT}\",\"wallet_scheme\":\"DatabasePerWallet\"}'
   - name: ACAPY_WALLET_STORAGE_CREDS
     displayName: Wallet Storage Credential Configuration
     required: true
     description: Wallet storage credential configuration
-    value: '{\"account\":\"${POSTGRESQL_USER}\",\"password\":\"${POSTGRESQL_PASSWORD}\",\"admin_account\":\"${POSTGRESQL_ADMIN_USER}\",\"admin_password\":\"${POSTGRESQL_ADMIN_PASSWORD}\"}'
+    value: '{\"account\":\"${POSTGRESQL_WALLET_USER}\",\"password\":\"${POSTGRESQL_WALLET_PASSWORD}\",\"admin_account\":\"postgres\",\"admin_password\":\"${POSTGRESQL_WALLET_ADMIN_PASSWORD}\"}'
   - name: INDY_ADMIN_PORT
     displayName: Admin Port
     description: The admin port on which the service will listen.
@@ -529,7 +536,7 @@ parameters:
     displayName: Display Label
     description: Display label
     required: true
-    value: Aries Mediator Service
+    value: Mediator
   - name: LOG_LEVEL
     displayName: Log Level
     description: Log Level

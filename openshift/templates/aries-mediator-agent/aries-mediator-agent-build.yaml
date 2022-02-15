@@ -44,6 +44,11 @@ parameters:
     description: The name assigned to all of the resources defined in this template.
     required: true
     value: aries-mediator-agent
+  - name: SUFFIX
+    displayName: Suffix
+    description: A name suffix used for all objects
+    required: false
+    value: 
   - name: APP_NAME
     displayName: App Name
     description: Used to group components together.

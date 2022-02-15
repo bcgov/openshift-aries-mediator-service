@@ -21,16 +21,8 @@ objects:
         - from:
             - podSelector:
                 matchLabels:
-                  role: ${SERVICE_ROLE}
+                  role: ${AGENT_ROLE}
                   app: ${APP_NAME}
-                  env: ${TAG_NAME}
-              namespaceSelector:
-                matchLabels:
-                  name: ${NAMESPACE_NAME}
-                  environment: ${TAG_NAME}
-            - podSelector:
-                matchLabels:
-                  role: ${BACKUP_ROLE}
                   env: ${TAG_NAME}
               namespaceSelector:
                 matchLabels:
@@ -216,7 +208,7 @@ parameters:
     description: The name assigned to all of the OpenShift resources associated to
       the server instance.
     required: true
-    value: aries-mediator-service-db
+    value: aries-mediator-db
   - name: APP_NAME
     displayName: App Name
     description: Used to group components together.
@@ -237,11 +229,11 @@ parameters:
     description: The role of this service within the application - used for Network Policies
     required: true
     value: db
-  - name: SERVICE_ROLE
-    displayName: Service Role
-    description: The role of the email verification service within the application - used for Network Policies
+  - name: AGENT_ROLE
+    displayName: Agent Role
+    description: The role of the mediator agent within the application - used for Network Policies
     required: true
-    value: service
+    value: agent
   - name: BACKUP_ROLE
     displayName: Backup Role
     description: The role of the backup container - used for Network Policies
@@ -262,7 +254,7 @@ parameters:
     displayName: Source Image Name
     description: The name of the image to use for this resource.
     required: true
-    value: postgresql
+    value: aries-mediator-db
   - name: TAG_NAME
     displayName: Environment TAG name
     description: The TAG name for this environment, e.g., dev, test, prod
@@ -276,13 +268,13 @@ parameters:
   - name: POSTGRESQL_USER
     displayName: PostgreSQL Connection Username
     description: Username for PostgreSQL user that will be used for accessing the
-      database.  Needs to be basee64 encoded/
+      database.  Needs to be base64 encoded/
     required: true
     generate: expression
     from: '[a-zA-Z_][a-zA-Z0-9_]{10}'
   - name: POSTGRESQL_PASSWORD
     displayName: PostgreSQL Connection Password
-    description: Password for the PostgreSQL connection user.  Needs to be basee64
+    description: Password for the PostgreSQL connection user.  Needs to be base64
       encoded/
     required: true
     generate: expression
@@ -290,7 +282,7 @@ parameters:
   - name: POSTGRESQL_ADMIN_PASSWORD
     displayName: PostgreSQL Admin Password
     description: Password for the 'postgres' PostgreSQL administrative account.  Needs
-      to be basee64 encoded.
+      to be base64 encoded.
     required: true
     generate: expression
     from: '[a-zA-Z0-9_~!@#$%^&*()-=<>,.?;:|]{16}'
