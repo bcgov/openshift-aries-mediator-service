@@ -325,19 +325,10 @@ objects:
                     secretKeyRef:
                       name: ${NAME}${SUFFIX}
                       key: seed
-                - name: AGENT_ADMIN_API_KEY
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}${SUFFIX}-api
-                      key: admin-api-key
                 - name: ACAPY_GENESIS_URL
                   value: ${GENESIS_FILE_URL}
                 - name: ACAPY_ENDPOINT
                   value: ${AGENT_URL}
-                - name: ACAPY_WEBHOOK_URL
-                  value: ${WEBHOOK_URL}
-                - name: ACAPY_LABEL
-                  value: ${DISPLAY_LABEL}
                 - name: ACAPY_READ_ONLY_LEDGER
                   value: ${AGENT_READ_ONLY_LEDGER}
               image: " "

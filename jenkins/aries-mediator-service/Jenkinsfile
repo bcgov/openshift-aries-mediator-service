@@ -9,7 +9,7 @@ def WAIT_TIMEOUT = 5
 
 // Assumes Builds, Images, and Deployments all have the same name(s)
 // Components will be deployed in the order they are listed.
-def COMPONENTS = ['aries-mediator-service', 'aries-mediator-agent', 'postgres']
+def COMPONENTS = ['aries-mediator-db', 'aries-mediator-service', 'aries-mediator-agent' ]
 
 // Edit your environment TAG names below
 def TAG_NAMES = ['dev']
