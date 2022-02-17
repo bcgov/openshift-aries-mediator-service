@@ -3,18 +3,18 @@
 # Component: .
 # Template File: ../openshift/templates/postgresql/postgresql-deploy.yaml
 #=========================================================
-# NAME=aries-mediator-service-db
+# NAME=aries-mediator-db
 # APP_NAME=aries-mediator-service
 # NAMESPACE_NAME=4a9599
 # SUFFIX=
 # ROLE=db
-# SERVICE_ROLE=service
+# AGENT_ROLE=agent
 # BACKUP_ROLE=backup-container
 # APP_GROUP=aries-mediator-service
 # IMAGE_NAMESPACE=4a9599-tools
-# SOURCE_IMAGE_NAME=postgresql
+# SOURCE_IMAGE_NAME=aries-mediator-db
 TAG_NAME=test
-# POSTGRESQL_DATABASE_NAME=aries-mediator-service-db
+# POSTGRESQL_DATABASE_NAME=aries-mediator-db
 # POSTGRESQL_USER=[a-zA-Z_][a-zA-Z0-9_]{10}
 # POSTGRESQL_PASSWORD=[a-zA-Z0-9_~!@#$%^&*()-=<>,.?;:|]{16}
 # POSTGRESQL_ADMIN_PASSWORD=[a-zA-Z0-9_~!@#$%^&*()-=<>,.?;:|]{16}

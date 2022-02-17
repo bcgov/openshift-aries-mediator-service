@@ -5,17 +5,17 @@
 def APP_LABEL = 'aries-mediator-service'
 
 // Wait timeout in minutes
-def WAIT_TIMEOUT = 5
+def WAIT_TIMEOUT = 20
 
 // Assumes Builds, Images, and Deployments all have the same name(s)
 // Components will be deployed in the order they are listed.
 def COMPONENTS = ['aries-mediator-db', 'aries-mediator-service', 'aries-mediator-agent' ]
 
 // Edit your environment TAG names below
-def TAG_NAMES = ['dev']
+def TAG_NAMES = ['dev', 'test', 'prod']
 
 // Edit your deployment environment names below
-def DEP_ENV_NAMES = ['dev']
+def DEP_ENV_NAMES = ['dev', 'test', 'prod']
 
 // The base namespace of you environments.
 def NAME_SPACE = '4a9599'

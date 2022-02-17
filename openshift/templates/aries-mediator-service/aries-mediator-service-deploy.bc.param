@@ -3,40 +3,19 @@
 # Component: .
 # Template File: ../openshift/templates/api/api-deploy.yaml
 #=========================================================
-NAME=api
-ROLE=api
-AGENT_ROLE=agent
-DATABASE_ROLE=db
-NAMESPACE=4a9599
-SUFFIX=-bc
-APP_NAME=orgbook
-APP_GROUP=aries-vcr
-IMAGE_NAMESPACE=4a9599-tools
-DATABASE_HOST=db
-DATABASE_ENGINE=postgresql
-APP_FILE=app-vonx.py
-APP_CONFIG=
-APP_MODULE=api_indy.tob_anchor.boot:init_app
+NAME=aries-mediator-service
+ROLE=service
 TAG_NAME=dev
-MSG_QUEUE_HOST=msg-queue
-THEME=bcgov
-USE_AUTHENTICATION=
-# USER_ID=[a-zA-Z_][a-zA-Z0-9_]{10}
-# USER_PASSWORD=[a-zA-Z0-9_~!@#$%^&*()-=<>,.?;:|]{16}
-# ADMIN_USER_ID=[a-zA-Z_][a-zA-Z0-9_]{10}
-# ADMIN_PASSWORD=[a-zA-Z0-9_~!@#$%^&*()-=<>,.?;:|]{16}
-APPLICATION_URL=https://dev.orgbook.gov.bc.ca
-EMAIL_SETTINGS_STORE_NAME=email-settings
-FEEDBACK_TARGET_EMAIL=
-SMTP_SERVER_ADDRESS=
-TRACE_EVENTS=false
-RECORD_TIMINGS=false
-SP_TRACKING_APP_ID=orgbook_api_dev
-API_VERSION_ROUTING_MIDDLEWARE=vcr_server.middleware.api_tracking.SnowplowTrackingMiddleware
-SP_TRACKING_EMITTER=spt.apps.gov.bc.ca
-DEMO_SITE=True
-AGENT_HOST=agent
-AGENT_ADMIN_PORT=8024
+API_PORT=3010
+# API_KEY=[a-zA-Z0-9]{32}
+AGENT_ROLE=agent
+AGENT_HOST=aries-mediator-agent
+AGENT_ADMIN_PORT=3002
+NAMESPACE=4a9599
+SUFFIX=
+APP_NAME=aries-mediator-service
+APP_GROUP=aries-mediator-service
+IMAGE_NAMESPACE=4a9599-tools
 MIN_REPLICAS=2
 MAX_REPLICAS=16
 CPU_REQUEST=150m

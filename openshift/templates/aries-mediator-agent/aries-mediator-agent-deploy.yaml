@@ -266,7 +266,7 @@ objects:
                   --wallet-storage-creds "$(eval echo \"${WALLET_STORAGE_CREDENTIALS}\")"
                   --admin 0.0.0.0 ${MEDIATOR_AGENT_HTTP_ADMIN_PORT} 
                   --admin-api-key ${MEDIATOR_AGENT_ADMIN_MODE} 
-                  ${MEDIATOR_CONTROLLER_WEBHOOK}
+                  --webhook-url ${MEDIATOR_CONTROLLER_WEBHOOK}
                   );
               env:
                 - name: POSTGRESQL_WALLET_HOST
@@ -470,7 +470,7 @@ parameters:
     displayName: Controller Webhook
     required: true
     description: Controller Webhook
-    value: --webhook-url http://aries-mediator-service:3010/webhooks
+    value: http://aries-mediator-service:3010/webhooks
   - name: ACAPY_WALLET_STORAGE_CONFIG
     displayName: Wallet Storage Configuration
     required: true
@@ -513,11 +513,6 @@ parameters:
     description: The URL for the site
     required: true
     value: https://aries-mediator-agent-dev.apps.silver.devops.gov.bc.ca
-  - name: WEBHOOK_URL
-    displayName: Webhook URL
-    description: The webhook endpoint
-    required: true
-    value: http://aries-mediator-service:8080/webhooks
   - name: GENESIS_FILE_URL
     displayName: Genesis File URL
     description: The URL from which the genesis file can be downloaded.

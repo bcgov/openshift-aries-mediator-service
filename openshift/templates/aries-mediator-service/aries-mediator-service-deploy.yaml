@@ -140,18 +140,6 @@ objects:
               env:
                 - name: PORT
                   value: ${API_PORT}
-                - name: APP_FILE
-                  value: ${APP_FILE}
-                - name: APP_CONFIG
-                  value: ${APP_CONFIG}
-                - name: APP_MODULE
-                  value: ${APP_MODULE}
-                - name: DEMO_SITE
-                  value: ${DEMO_SITE}
-                - name: THEME
-                  value: ${THEME}
-                - name: APPLICATION_URL
-                  value: ${APPLICATION_URL}
                 - name: CONTROLLER_ADMIN_API_KEY
                   valueFrom:
                     secretKeyRef:
@@ -164,16 +152,6 @@ objects:
                     secretKeyRef:
                       name: ${AGENT_HOST}${SUFFIX}-api
                       key: admin-api-key
-                - name: TRACE_EVENTS
-                  value: ${TRACE_EVENTS}
-                - name: RECORD_TIMINGS
-                  value: ${RECORD_TIMINGS}
-                - name: SP_TRACKING_APP_ID
-                  value: ${SP_TRACKING_APP_ID}
-                - name: API_VERSION_ROUTING_MIDDLEWARE
-                  value: ${API_VERSION_ROUTING_MIDDLEWARE}
-                - name: SP_TRACKING_EMITTER
-                  value: ${SP_TRACKING_EMITTER}
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
@@ -241,11 +219,6 @@ parameters:
     description: Agent Port
     required: true
     value: "3002"
-  - name: DATABASE_ROLE
-    displayName: Database Role
-    description: Database Role
-    required: true
-    value: db
   - name: NAMESPACE
     displayName: The target namespace for the resources.
     required: true
@@ -270,16 +243,6 @@ parameters:
     required: true
     description: The namespace of the OpenShift project containing the imagestream for the application.
     value: 4a9599-tools
-  - name: DATABASE_HOST
-    displayName: Database Service Name
-    description: The name of the database server/service.
-    required: true
-    value: aries-mediator-db
-  - name: DATABASE_ENGINE
-    displayName: Database Engine
-    required: true
-    description: "Database engine: postgresql, mysql, or sqlite (default)."
-    value: postgresql
 
   - name: MIN_REPLICAS
     displayName: Minimum Replicas
