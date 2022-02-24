@@ -10,6 +10,7 @@
 # SUFFIX=
 # ROLE=agent
 # SERVICE_ROLE=service
+# API_HOST=aries-mediator-service
 APPLICATION_ADMIN_DOMAIN=aries-mediator-agent-admin-test.apps.silver.devops.gov.bc.ca
 APPLICATION_DOMAIN=aries-mediator-agent-test.apps.silver.devops.gov.bc.ca
 # IMAGE_NAMESPACE=4a9599-tools

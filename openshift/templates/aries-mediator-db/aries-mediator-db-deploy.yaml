@@ -16,12 +16,21 @@ objects:
         env: ${TAG_NAME}
     spec:
       description: |
-        Allow the api(s) to access the db.
+        Allow the api(s) and the backup container to access the db.
       ingress:
         - from:
             - podSelector:
                 matchLabels:
                   role: ${AGENT_ROLE}
+                  app: ${APP_NAME}
+                  env: ${TAG_NAME}
+              namespaceSelector:
+                matchLabels:
+                  name: ${NAMESPACE_NAME}
+                  environment: ${TAG_NAME}
+            - podSelector:
+                matchLabels:
+                  role: ${BACKUP_ROLE}
                   app: ${APP_NAME}
                   env: ${TAG_NAME}
               namespaceSelector:
@@ -44,6 +53,7 @@ objects:
       labels:
         app: ${APP_NAME}${SUFFIX}
         name: ${NAME}${SUFFIX}
+        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
         app-group: ${APP_GROUP}
         role: ${ROLE}
         env: ${TAG_NAME}
@@ -155,6 +165,7 @@ objects:
       labels:
         app: ${APP_NAME}${SUFFIX}
         name: ${NAME}${SUFFIX}
+        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
         app-group: ${APP_GROUP}  
         role: ${ROLE}
         env: ${TAG_NAME}
@@ -172,6 +183,7 @@ objects:
       labels:
         app: ${APP_NAME}${SUFFIX}
         name: ${NAME}${SUFFIX}
+        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
         app-group: ${APP_GROUP}
         role: ${ROLE}
         env: ${TAG_NAME}
@@ -238,7 +250,7 @@ parameters:
     displayName: Backup Role
     description: The role of the backup container - used for Network Policies
     required: true
-    value: backup-container
+    value: backup
   - name: APP_GROUP
     displayName: App Group
     description: The name assigned to all of the deployments in this project.

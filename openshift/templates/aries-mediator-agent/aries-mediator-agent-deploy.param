@@ -9,6 +9,7 @@ NAMESPACE_NAME=4a9599
 APP_NAME=aries-mediator-service
 SUFFIX=
 ROLE=agent
+API_HOST=aries-mediator-service
 SERVICE_ROLE=service
 APPLICATION_ADMIN_DOMAIN=aries-mediator-agent-admin-dev.apps.silver.devops.gov.bc.ca
 APPLICATION_DOMAIN=aries-mediator-agent-dev.apps.silver.devops.gov.bc.ca

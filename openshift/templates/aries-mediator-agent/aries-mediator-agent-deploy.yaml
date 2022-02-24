@@ -4,49 +4,6 @@ apiVersion: v1
 metadata:
   name: ${NAME}${SUFFIX}
 objects:
-  # - kind: ExternalNetwork
-  #   apiVersion: security.devops.gov.bc.ca/v1alpha1
-  #   metadata:
-  #     name: ${NAME}${SUFFIX}
-  #     network: ${NAME}${SUFFIX}
-  #     labels:
-  #       name: ${NAME}${SUFFIX}
-  #       network: ${NAME}${SUFFIX}
-  #       app: ${APP_NAME}${SUFFIX}
-  #       app-group: ${APP_GROUP}
-  #       env: ${TAG_NAME}
-  #   spec:
-  #     description: |
-  #       Define the network parameters for accessing remote agents.
-  #     entries:
-  #       - 0.0.0.0/0
-  #     servicePorts:
-  #       - tcp/9700:9799
-  #       - tcp/80
-  #       - tcp/443
-  # - kind: NetworkSecurityPolicy
-  #   apiVersion: security.devops.gov.bc.ca/v1alpha1
-  #   metadata:
-  #     name: ${NAME}${SUFFIX}
-  #     labels:
-  #       name: ${NAME}${SUFFIX}
-  #       env: ${TAG_NAME}
-  #       app: ${APP_NAME}${SUFFIX}
-  #       app-group: ${APP_GROUP}
-  #   spec:
-  #     description: Allow the the agent to access the service and external network
-  #     source:
-  #       - - $namespace=${NAMESPACE_NAME}-${TAG_NAME}
-  #         - role=${ROLE}
-  #         - app=${APP_NAME}${SUFFIX}
-  #         - env=${TAG_NAME}
-  #     destination:
-  #       - - ext:name=${NAME}${SUFFIX}
-  #       - - role=service
-  #         - app=${APP_NAME}${SUFFIX}
-  #         - env=${TAG_NAME}
-  #         - $namespace=${NAMESPACE_NAME}-${TAG_NAME}
-
   - kind: NetworkPolicy
     apiVersion: networking.k8s.io/v1
     metadata:
@@ -182,6 +139,7 @@ objects:
       labels:
         app: ${APP_NAME}${SUFFIX}
         name: ${NAME}${SUFFIX}
+        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
         app-group: ${APP_GROUP}
         role: ${ROLE}
         env: ${TAG_NAME}
@@ -200,6 +158,7 @@ objects:
       labels:
         app: ${APP_NAME}${SUFFIX}
         name: ${NAME}${SUFFIX}
+        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
         app-group: ${APP_GROUP}
         role: ${ROLE}
         env: ${TAG_NAME}
@@ -215,6 +174,7 @@ objects:
       labels:
         name: ${NAME}${SUFFIX}
         app: ${APP_NAME}${SUFFIX}
+        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
         app-group: ${APP_GROUP}
         role: ${ROLE}
         env: ${TAG_NAME}
@@ -229,9 +189,15 @@ objects:
       labels:
         app: ${APP_NAME}${SUFFIX}
         name: ${NAME}${SUFFIX}
+        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
         app-group: ${APP_GROUP}
         role: ${ROLE}
         env: ${TAG_NAME}
+      annotations:
+        description: Defines how to deploy the application server
+        app.openshift.io/connects-to: >-
+          [{"apiVersion":"apps.openshift.io/v1","kind":"DeploymentConfig","name":"${WALLET_HOST}${SUFFIX}"},
+          {"apiVersion":"apps.openshift.io/v1","kind":"DeploymentConfig","name":"${API_HOST}${SUFFIX}"}]
     spec:
       replicas: 1
       selector:
@@ -440,6 +406,10 @@ parameters:
     description: Enable/Disable the read only ledger flag.  Controls the inclusion/exclusion of the agent '--read-only-ledger' startup parameter.  Defaults to disabled.
     required: true
     value: "false"
+  - name: API_HOST
+    displayName: Name of the API container, used for labels 
+    required: true
+    value: aries-mediator-service
   - name: ADMIN_API_KEY
     displayName: Agent Admin API Key
     description: The key used to authenticate client requests to the admin api.

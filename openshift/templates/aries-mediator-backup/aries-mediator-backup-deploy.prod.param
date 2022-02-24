@@ -1,0 +1,38 @@
+#=========================================================
+# OpenShift template parameters for:
+# Component: .
+# Template File: ../openshift/templates/backup/backup-deploy.yaml
+#=========================================================
+# NAME=aries-mediator-backup
+# SUFFIX=
+# APP_NAME=aries-mediator-service
+# APP_GROUP=aries-mediator-service
+# SOURCE_IMAGE_NAME=aries-mediator-backup
+# IMAGE_NAMESPACE=4a9599-tools
+TAG_NAME=prod
+# WALLET_DB_HOST=aries-mediator-db
+# DATABASE_USER_KEY_NAME=database-user
+# DATABASE_PASSWORD_KEY_NAME=database-password
+# BACKUP_STRATEGY=rolling
+# WEBHOOK_URL=
+ENVIRONMENT_FRIENDLY_NAME=Aries Mediator Service (prod)
+ENVIRONMENT_NAME=4a9599-prod
+# BACKUP_DIR=/backups/
+# DAILY_BACKUPS=2
+# WEEKLY_BACKUPS=1
+# MONTHLY_BACKUPS=0
+# DATABASE_SERVER_TIMEOUT=300
+# CONFIG_FILE_NAME=backup.conf
+# CONFIG_MAP_NAME=backup-conf
+# CONFIG_MOUNT_PATH=/
+# BACKUP_VOLUME_NAME=aries-mediator-backup
+BACKUP_VOLUME_SIZE=30Gi
+# BACKUP_VOLUME_CLASS=netapp-file-backup
+# VERIFICATION_VOLUME_NAME=aries-mediator-backup-verification
+VERIFICATION_VOLUME_SIZE=20Gi
+# VERIFICATION_VOLUME_CLASS=netapp-file-standard
+# VERIFICATION_VOLUME_MOUNT_PATH=/var/lib/pgsql/data
+# CPU_REQUEST=0
+# CPU_LIMIT=0
+# MEMORY_REQUEST=0Mi
+# MEMORY_LIMIT=0Mi
