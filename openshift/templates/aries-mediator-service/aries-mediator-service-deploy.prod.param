@@ -5,11 +5,12 @@
 #=========================================================
 # NAME=aries-mediator-service
 # ROLE=service
-TAG_NAME=test
+TAG_NAME=prod
 # API_PORT=3010
 # API_KEY=[a-zA-Z0-9]{32}
 # AGENT_ROLE=agent
 # AGENT_HOST=aries-mediator-agent
+APPLICATION_ADMIN_DOMAIN=aries-mediator-service-admin.apps.silver.devops.gov.bc.ca
 # AGENT_ADMIN_PORT=3002
 # NAMESPACE=4a9599
 # SUFFIX=
