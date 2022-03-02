@@ -12,8 +12,8 @@ objects:
       name: ${NAME}
       labels:
         name: ${NAME}
-        app: ${APP_NAME}${SUFFIX}
-        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
+        app: ${APP_NAME}
+        app.kubernetes.io/part-of: ${APP_NAME}
         app-group: ${APP_GROUP}
 
   - kind: BuildConfig
@@ -22,8 +22,8 @@ objects:
       name: ${NAME}
       labels:
         name: ${NAME}
-        app: ${APP_NAME}${SUFFIX}
-        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
+        app: ${APP_NAME}
+        app.kubernetes.io/part-of: ${APP_NAME}
         app-group: ${APP_GROUP}
     spec:
       triggers:
@@ -52,11 +52,6 @@ parameters:
     description: The name assigned to all of the resources defined in this template.
     required: true
     value: aries-mediator-backup
-  - name: SUFFIX
-    displayName: Suffix
-    description: A name suffix used for all objects
-    required: false
-    value: 
   - name: APP_NAME
     displayName: App Name
     description: Used to group components together in the OpenShift console.

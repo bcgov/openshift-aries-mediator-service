@@ -7,7 +7,31 @@ metadata:
     tags: node
     iconClass: icon-node
 objects:
-
+  - kind: NetworkPolicy
+    apiVersion: networking.k8s.io/v1
+    metadata:
+      name: ${NAME}${SUFFIX}-allow-ingress
+      labels:
+        name: ${NAME}${SUFFIX}-allow-ingress
+        app: ${APP_NAME}${SUFFIX}
+        app-group: ${APP_GROUP}
+        role: ${ROLE}
+        env: ${TAG_NAME}
+    spec:
+      description: |
+        Allow traffic from routes into the ${ROLE} container(s).
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  network.openshift.io/policy-group: ingress
+      podSelector:
+        matchLabels:
+          role: ${ROLE}
+          app: ${APP_NAME}${SUFFIX}
+          env: ${TAG_NAME}
+      policyTypes:
+        - Ingress
   - kind: NetworkPolicy
     apiVersion: networking.k8s.io/v1
     metadata:
@@ -40,20 +64,44 @@ objects:
           role: ${ROLE}
           app: ${APP_NAME}${SUFFIX}
           env: ${TAG_NAME}
+          
+  - kind: Route
+    apiVersion: v1
+    metadata:
+      name: ${NAME}${SUFFIX}-admin
+      labels:
+        name: ${NAME}${SUFFIX}-admin
+        app: ${APP_NAME}${SUFFIX}
+        app-group: ${APP_GROUP}
+        role: ${ROLE}
+        env: ${TAG_NAME}
+      annotations:
+        haproxy.router.openshift.io/timeout: ${ROUTE_TIMEOUT}
+    spec:
+      host: ${APPLICATION_ADMIN_DOMAIN}
+      port:
+        targetPort: ${NAME}${SUFFIX}-admin
+      tls:
+        insecureEdgeTerminationPolicy: Redirect
+        termination: edge
+      to:
+        kind: Service
+        name: ${NAME}${SUFFIX}-admin
+        weight: 100
 
   - kind: Service
     apiVersion: v1
     metadata:
-      name: ${NAME}${SUFFIX}
+      name: ${NAME}${SUFFIX}-admin
       labels:
-        name: ${NAME}${SUFFIX}
+        name: ${NAME}${SUFFIX}-admin
         app: ${APP_NAME}${SUFFIX}
         app-group: ${APP_GROUP}
         role: ${ROLE}
         env: ${TAG_NAME}
     spec:
       ports:
-        - name: api-port-tcp
+        - name: ${NAME}${SUFFIX}-admin
           port: ${{API_PORT}}
           protocol: TCP
           targetPort: ${{API_PORT}}
@@ -220,6 +268,11 @@ parameters:
     description: Agent Host
     required: true
     value: aries-mediator-agent
+  - name: APPLICATION_ADMIN_DOMAIN
+    displayName: Application Hostname
+    description: The exposed hostname that will route to the service, if left blank a value will be defaulted.
+    required: false
+    value: aries-mediator-service-admin-dev.apps.silver.devops.gov.bc.ca
   - name: AGENT_ADMIN_PORT
     displayName: Agent Port
     description: Agent Port

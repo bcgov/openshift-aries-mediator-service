@@ -4,7 +4,6 @@
 # Template File: ../openshift/templates/backup/backup-build.yaml
 #=========================================================
 NAME=aries-mediator-backup
-SUFFIX=
 APP_NAME=aries-mediator-service
 APP_GROUP=aries-mediator-service
 GIT_REPO_URL=https://github.com/BCDevOps/backup-container.git
