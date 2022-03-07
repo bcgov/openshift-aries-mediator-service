@@ -3,14 +3,14 @@
 # Component: .
 # Template File: ../openshift/templates/api/api-deploy.yaml
 #=========================================================
-# NAME=aries-mediator-service
-# ROLE=service
+# NAME=aries-mediator-controller
+# ROLE=controller
 TAG_NAME=prod
 # API_PORT=3010
 # API_KEY=[a-zA-Z0-9]{32}
 # AGENT_ROLE=agent
 # AGENT_HOST=aries-mediator-agent
-APPLICATION_ADMIN_DOMAIN=aries-mediator-service-admin.apps.silver.devops.gov.bc.ca
+APPLICATION_ADMIN_DOMAIN=aries-mediator-controller-admin.apps.silver.devops.gov.bc.ca
 # AGENT_ADMIN_PORT=3002
 # NAMESPACE=4a9599
 # SUFFIX=

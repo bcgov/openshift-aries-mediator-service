@@ -1,0 +1,34 @@
+:{$CADDY_AGENT_HTTP_IN_PORT} {
+    @websockets {
+        header Connection *Upgrade*
+        header Upgrade websocket
+    }
+
+    handle @websockets {
+        reverse_proxy http://{$AGENT_HOST}:{$MEDIATOR_AGENT_WS_IN_PORT}
+    }
+
+    handle {
+        reverse_proxy http://{$AGENT_HOST}:{$MEDIATOR_AGENT_HTTP_IN_PORT}
+    }
+
+    log {
+            # errors stdout
+            output stdout 
+            # format single_field common_log
+            level DEBUG
+    }
+}
+:{$CADDY_AGENT_ADMIN_IN_PORT} {
+
+    handle {
+        reverse_proxy http://{$AGENT_HOST}:{$MEDIATOR_AGENT_HTTP_ADMIN_PORT}
+    }
+
+    log {
+            # errors stdout
+            output stdout 
+            # format single_field common_log
+            level DEBUG
+    }
+}

@@ -1,8 +1,9 @@
 # Uses the 'testConnection' script from https://github.com/BCDevOps/openshift-developer-tools
 # Example:
-# echo -e "aries-mediator-agent\n aries-mediator-backup\n aries-mediator-db\n aries-mediator-service"  | xargs -I {} testConnection -n 4a9599-dev -f TestConnections.txt -p {}
+# echo -e "aries-mediator-agent\n aries-mediator-backup\n aries-mediator-db\n aries-mediator-proxy"  | xargs -I {} testConnection -n 4a9599-dev -f TestConnections.txt -p {}
 
 google.com:80
 aries-mediator-db:5432
 aries-mediator-agent:3002
-aries-mediator-service:3010
+aries-mediator-agent:3001
+aries-mediator-agent:3000
