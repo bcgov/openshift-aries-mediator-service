@@ -1,0 +1,348 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name: ${NAME}${SUFFIX}-deployment-template
+  annotations:
+    description: Deployment template for a Node server connected to Aries agent.
+    tags: node
+    iconClass: icon-node
+objects:
+  - kind: NetworkPolicy
+    apiVersion: networking.k8s.io/v1
+    metadata:
+      name: ${NAME}${SUFFIX}-allow-ingress
+      labels:
+        name: ${NAME}${SUFFIX}-allow-ingress
+        app: ${APP_NAME}${SUFFIX}
+        app-group: ${APP_GROUP}
+        role: ${ROLE}
+        env: ${TAG_NAME}
+    spec:
+      description: |
+        Allow traffic from routes into the ${ROLE} container(s).
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  network.openshift.io/policy-group: ingress
+      podSelector:
+        matchLabels:
+          role: ${ROLE}
+          app: ${APP_NAME}${SUFFIX}
+          env: ${TAG_NAME}
+      policyTypes:
+        - Ingress
+
+  - kind: Route
+    apiVersion: v1
+    metadata:
+      name: ${NAME}${SUFFIX}-admin
+      labels:
+        name: ${NAME}${SUFFIX}-admin
+        app: ${APP_NAME}${SUFFIX}
+        app-group: ${APP_GROUP}
+        role: ${ROLE}
+        env: ${TAG_NAME}
+      annotations:
+        haproxy.router.openshift.io/timeout: ${ROUTE_TIMEOUT}
+    spec:
+      host: ${APPLICATION_ADMIN_DOMAIN}
+      port:
+        targetPort: ${NAME}${SUFFIX}-admin
+      tls:
+        insecureEdgeTerminationPolicy: Redirect
+        termination: edge
+      to:
+        kind: Service
+        name: ${NAME}${SUFFIX}
+        weight: 100
+  
+  - kind: Route
+    apiVersion: v1
+    metadata:
+      name: ${NAME}${SUFFIX}
+      labels:
+        name: ${NAME}${SUFFIX}
+        app: ${APP_NAME}${SUFFIX}
+        app-group: ${APP_GROUP}
+        role: ${ROLE}
+        env: ${TAG_NAME}
+      annotations:
+        haproxy.router.openshift.io/timeout: ${ROUTE_TIMEOUT}
+    spec:
+      host: ${APPLICATION_DOMAIN}
+      port:
+        targetPort: ${NAME}${SUFFIX}
+      tls:
+        insecureEdgeTerminationPolicy: Redirect
+        termination: edge
+      to:
+        kind: Service
+        name: ${NAME}${SUFFIX}
+        weight: 100
+
+  - kind: Service
+    apiVersion: v1
+    metadata:
+      name: ${NAME}${SUFFIX}
+      labels:
+        name: ${NAME}${SUFFIX}
+        app: ${APP_NAME}${SUFFIX}
+        app-group: ${APP_GROUP}
+        role: ${ROLE}
+        env: ${TAG_NAME}
+    spec:
+      ports:
+        - name: ${NAME}${SUFFIX}
+          port: ${{CADDY_AGENT_PORT}}
+          protocol: TCP
+          targetPort: ${{CADDY_AGENT_PORT}}
+        - name: ${NAME}${SUFFIX}-admin
+          port: ${{CADDY_AGENT_ADMIN_PORT}}
+          protocol: TCP
+          targetPort: ${{CADDY_AGENT_ADMIN_PORT}}
+      selector:
+        name: ${NAME}${SUFFIX}
+
+  - kind: DeploymentConfig
+    apiVersion: v1
+    metadata:
+      name: ${NAME}${SUFFIX}
+      labels:
+        name: ${NAME}${SUFFIX}
+        app: ${APP_NAME}${SUFFIX}
+        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
+        app-group: ${APP_GROUP}
+        role: ${ROLE}
+        env: ${TAG_NAME}
+      annotations:
+        description: Defines how to deploy the application server
+        app.openshift.io/connects-to: >-
+          [{"apiVersion":"apps.openshift.io/v1","kind":"DeploymentConfig","name":"${AGENT_HOST}${SUFFIX}"}]
+    spec:
+      strategy:
+        type: Rolling
+      triggers:
+        - type: ImageChange
+          imageChangeParams:
+            automatic: true
+            containerNames:
+              - ${NAME}${SUFFIX}
+            from:
+              kind: ImageStreamTag
+              namespace: ${IMAGE_NAMESPACE}
+              name: ${NAME}:${TAG_NAME}
+        - type: ConfigChange
+      replicas: 1
+      selector:
+        name: ${NAME}${SUFFIX}
+      template:
+        metadata:
+          name: ${NAME}${SUFFIX}
+          labels:
+            name: ${NAME}${SUFFIX}
+            app: ${APP_NAME}${SUFFIX}
+            app-group: ${APP_GROUP}
+            role: ${ROLE}
+            env: ${TAG_NAME}
+        spec:
+          volumes:
+            - name: ${NAME}${SUFFIX}-config-volume
+              configMap:
+                name: ${CONFIG_MAP_NAME}${SUFFIX}
+                items:
+                  - key: ${CONFIG_FILE_NAME}
+                    path: ${CONFIG_FILE_NAME}
+          containers:
+            - name: ${NAME}${SUFFIX}
+              image: " "
+              ports:
+                - containerPort: ${{CADDY_AGENT_ADMIN_PORT}}
+                  protocol: TCP
+                - containerPort: ${{CADDY_AGENT_PORT}}
+                  protocol: TCP
+              readinessProbe:
+                failureThreshold: 5
+                periodSeconds: 30
+                initialDelaySeconds: 3
+                timeoutSeconds: 40
+                httpGet:
+                  path: "/"
+                  port: ${{CADDY_AGENT_PORT}}
+              livenessProbe:
+                failureThreshold: 5
+                periodSeconds: 60
+                initialDelaySeconds: 30
+                timeoutSeconds: 40
+                httpGet:
+                  path: "/"
+                  port: ${{CADDY_AGENT_PORT}}
+              env:
+                - name: MEDIATOR_AGENT_HTTP_ADMIN_PORT
+                  value: ${AGENT_ADMIN_PORT}
+                - name: MEDIATOR_AGENT_HTTP_IN_PORT
+                  value: ${AGENT_PORT}
+                - name: MEDIATOR_AGENT_WS_IN_PORT
+                  value: ${AGENT_WS_PORT}
+                - name: CADDY_AGENT_HTTP_IN_PORT
+                  value: ${CADDY_AGENT_PORT}
+                - name: CADDY_AGENT_ADMIN_IN_PORT
+                  value: ${CADDY_AGENT_ADMIN_PORT}
+                - name: AGENT_HOST
+                  value: ${AGENT_HOST} 
+              resources:
+                requests:
+                  cpu: ${CPU_REQUEST}
+                  memory: ${MEMORY_REQUEST}
+                limits:
+                  cpu: ${CPU_LIMIT}
+                  memory: ${MEMORY_LIMIT}
+              volumeMounts:
+                - name: ${NAME}${SUFFIX}-config-volume
+                  mountPath: ${CONFIG_MOUNT_PATH}${CONFIG_FILE_NAME}
+                  subPath: ${CONFIG_FILE_NAME}
+
+  - kind: HorizontalPodAutoscaler
+    apiVersion: autoscaling/v1
+    metadata:
+      name: ${NAME}${SUFFIX}
+      labels:
+        name: ${NAME}${SUFFIX}
+        app: ${APP_NAME}${SUFFIX}
+        app-group: ${APP_GROUP}
+        role: ${ROLE}
+        env: ${TAG_NAME}
+    spec:
+      scaleTargetRef:
+        kind: DeploymentConfig
+        name: ${NAME}${SUFFIX}
+      minReplicas: ${{MIN_REPLICAS}}
+      maxReplicas: ${{MAX_REPLICAS}}
+
+parameters:
+  - name: NAME
+    displayName: Name
+    description: The name assigned to all of the OpenShift resources associated to the server instance.
+    required: true
+    value: aries-mediator-proxy
+  - name: APP_NAME
+    displayName: App Name
+    description: Used to group components together.
+    required: true
+    value: aries-mediator-service
+  - name: ROLE
+    displayName: Role
+    description: Proxy Role
+    required: true
+    value: proxy
+  - name: TAG_NAME
+    displayName: Environment TAG name
+    description: The TAG name for this environment, e.g., dev, test, prod.
+    required: true
+    value: dev
+  - name: AGENT_HOST
+    displayName: Agent Host
+    description: Agent Host
+    required: true
+    value: aries-mediator-agent
+  - name: CONFIG_MOUNT_PATH
+    displayName: Config Mount Path
+    description: Location for the config file inside the nginx container
+    required: true
+    value: /etc/caddy/
+  - name: CONFIG_FILE_NAME
+    displayName: Config File Path
+    description: Name of the nginx config file
+    required: true
+    value: Caddyfile
+  - name: CONFIG_MAP_NAME
+    displayName: Config Map Name
+    description: name of the nginx config map
+    required: true
+    value: caddy-conf
+  - name: APPLICATION_ADMIN_DOMAIN
+    displayName: Application Hostname
+    description: The exposed hostname that will route to the service, if left blank a value will be defaulted.
+    required: false
+    value: aries-mediator-agent-admin-dev.apps.silver.devops.gov.bc.ca
+  - name: APPLICATION_DOMAIN
+    displayName: Application Hostname
+    description: The exposed hostname that will route to the service, if left blank a value will be defaulted.
+    required: false
+    value: aries-mediator-agent-dev.apps.silver.devops.gov.bc.ca
+  - name: AGENT_ADMIN_PORT
+    displayName: Agent Port
+    description: Agent Port
+    required: true
+    value: "3002"
+  - name: AGENT_PORT
+    displayName: Agent Port
+    description: Agent Port
+    required: true
+    value: "3000"
+  - name: AGENT_WS_PORT
+    displayName: Agent Port
+    description: Agent Port
+    required: true
+    value: "3001"
+  - name: CADDY_AGENT_ADMIN_PORT
+    displayName: Agent Port
+    description: Agent Port
+    required: true
+    value: "4002"
+  - name: CADDY_AGENT_PORT
+    displayName: Agent Port
+    description: Agent Port
+    required: true
+    value: "4000"
+  - name: NAMESPACE
+    displayName: The target namespace for the resources.
+    required: true
+    value: 4a9599
+  - name: SUFFIX
+    displayName: Suffix
+    description: A name suffix used for all objects
+    required: false
+    value: 
+  - name: APP_GROUP
+    displayName: App Group
+    description: The name assigned to all of the deployments in this project.
+    required: true
+    value: aries-mediator-service
+  - name: IMAGE_NAMESPACE
+    displayName: Image Namespace
+    required: true
+    description: The namespace of the OpenShift project containing the imagestream for the application.
+    value: 4a9599-tools
+
+  - name: MIN_REPLICAS
+    displayName: Minimum Replicas
+    description: The minimum number of pods to have running.
+    required: true
+    value: "2"
+  - name: MAX_REPLICAS
+    displayName: Maximum Replicas
+    description: The maximum number of pods to have running.
+    required: true
+    value: "16"
+
+  - name: CPU_REQUEST
+    displayName: Resources CPU Request
+    description: The resources CPU request (in cores) for this build.
+    required: true
+    value: 10m
+  - name: CPU_LIMIT
+    displayName: Resources CPU Limit
+    description: The resources CPU limit (in cores) for this build.
+    required: true
+    value: 300m
+  - name: MEMORY_REQUEST
+    displayName: Resources Memory Request
+    description: The resources Memory request (in Mi, Gi, etc) for this build.
+    required: true
+    value: 10Mi
+  - name: MEMORY_LIMIT
+    displayName: Resources Memory Limit
+    description: The resources Memory limit (in Mi, Gi, etc) for this build.
+    required: true
+    value: 512Mi

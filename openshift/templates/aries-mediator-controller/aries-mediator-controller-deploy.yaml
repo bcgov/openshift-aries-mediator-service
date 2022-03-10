@@ -44,7 +44,7 @@ objects:
         env: ${TAG_NAME}
     spec:
       description: |
-        Allow the agent and frontend to access the controller.
+        Allow the agent to access the controller.
       ingress:
         - from:
             - podSelector:
@@ -86,15 +86,15 @@ objects:
         termination: edge
       to:
         kind: Service
-        name: ${NAME}${SUFFIX}-admin
+        name: ${NAME}${SUFFIX}
         weight: 100
 
   - kind: Service
     apiVersion: v1
     metadata:
-      name: ${NAME}${SUFFIX}-admin
+      name: ${NAME}${SUFFIX}
       labels:
-        name: ${NAME}${SUFFIX}-admin
+        name: ${NAME}${SUFFIX}
         app: ${APP_NAME}${SUFFIX}
         app-group: ${APP_GROUP}
         role: ${ROLE}
@@ -236,12 +236,12 @@ parameters:
     displayName: Name
     description: The name assigned to all of the OpenShift resources associated to the server instance.
     required: true
-    value: aries-mediator-service
+    value: aries-mediator-controller
   - name: ROLE
     displayName: Role
     description: Service Role
     required: true
-    value: service
+    value: controller
   - name: TAG_NAME
     displayName: Environment TAG name
     description: The TAG name for this environment, e.g., dev, test, prod.
@@ -272,7 +272,7 @@ parameters:
     displayName: Application Hostname
     description: The exposed hostname that will route to the service, if left blank a value will be defaulted.
     required: false
-    value: aries-mediator-service-admin-dev.apps.silver.devops.gov.bc.ca
+    value: aries-mediator-controller-admin-dev.apps.silver.devops.gov.bc.ca
   - name: AGENT_ADMIN_PORT
     displayName: Agent Port
     description: Agent Port

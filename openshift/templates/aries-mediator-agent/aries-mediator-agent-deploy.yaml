@@ -7,38 +7,13 @@ objects:
   - kind: NetworkPolicy
     apiVersion: networking.k8s.io/v1
     metadata:
-      name: ${NAME}${SUFFIX}-allow-ingress
-      labels:
-        name: ${NAME}${SUFFIX}-allow-ingress
-        app: ${APP_NAME}${SUFFIX}
-        app-group: ${APP_GROUP}
-        role: ${ROLE}
-        env: ${TAG_NAME}
-    spec:
-      description: |
-        Allow traffic from routes into the ${ROLE} container(s).
-      ingress:
-        - from:
-            - namespaceSelector:
-                matchLabels:
-                  network.openshift.io/policy-group: ingress
-      podSelector:
-        matchLabels:
-          role: ${ROLE}
-          app: ${APP_NAME}${SUFFIX}
-          env: ${TAG_NAME}
-      policyTypes:
-        - Ingress
-  - kind: NetworkPolicy
-    apiVersion: networking.k8s.io/v1
-    metadata:
       name: ${NAME}${SUFFIX}
       labels:
         name: ${NAME}${SUFFIX}
         app: ${APP_NAME}${SUFFIX}
         env: ${TAG_NAME}
     spec:
-      description: Allow mediator agent ports to be accessed.
+      description: Allow mediator agent ports to be accessed by controller and caddy proxy.
       ingress:
         - from:
             - podSelector:
@@ -53,6 +28,23 @@ objects:
           ports:
             - protocol: TCP
               port: ${{INDY_ADMIN_PORT}}
+        - from:
+            - podSelector:
+                matchLabels:
+                  role: ${PROXY_ROLE}
+                  app: ${APP_NAME}${SUFFIX}
+                  env: ${TAG_NAME}
+              namespaceSelector:
+                matchLabels:
+                  name: ${NAMESPACE_NAME}
+                  environment: ${TAG_NAME}
+          ports:
+            - protocol: TCP
+              port: ${{INDY_ADMIN_PORT}}
+            - protocol: TCP
+              port: ${{INDY_AGENT_PORT}}
+            - protocol: TCP
+              port: ${{INDY_AGENT_WS_PORT}}
       podSelector:
         matchLabels:
           role: ${ROLE}
@@ -85,52 +77,6 @@ objects:
           targetPort: ${{INDY_AGENT_WS_PORT}}
       selector:
         name: ${NAME}${SUFFIX}
-
-  - kind: Route
-    apiVersion: v1
-    metadata:
-      name: ${NAME}${SUFFIX}
-      labels:
-        app: ${APP_NAME}${SUFFIX}
-        name: ${NAME}${SUFFIX}
-        app-group: ${APP_GROUP}
-        role: ${ROLE}
-        env: ${TAG_NAME}
-    spec:
-      host: ${APPLICATION_DOMAIN}
-      port:
-        targetPort: ${NAME}${SUFFIX}-public
-      tls:
-        insecureEdgeTerminationPolicy: Redirect
-        termination: edge
-      to:
-        kind: Service
-        name: ${NAME}${SUFFIX}
-        weight: 100
-  
-  - kind: Route
-    apiVersion: v1
-    metadata:
-      name: ${NAME}${SUFFIX}-admin
-      labels:
-        name: ${NAME}${SUFFIX}-admin
-        app: ${APP_NAME}${SUFFIX}
-        app-group: ${APP_GROUP}
-        role: ${ROLE}
-        env: ${TAG_NAME}
-      annotations:
-        haproxy.router.openshift.io/timeout: ${ROUTE_TIMEOUT}
-    spec:
-      host: ${APPLICATION_ADMIN_DOMAIN}
-      port:
-        targetPort: ${NAME}${SUFFIX}-admin
-      tls:
-        insecureEdgeTerminationPolicy: Redirect
-        termination: edge
-      to:
-        kind: Service
-        name: ${NAME}${SUFFIX}
-        weight: 100
 
   - kind: PersistentVolumeClaim
     apiVersion: v1
@@ -226,6 +172,7 @@ objects:
                   --inbound-transport ws 0.0.0.0 ${MEDIATOR_AGENT_WS_IN_PORT} 
                   --outbound-transport ws 
                   --outbound-transport http 
+                  --endpoint ${AGENT_URL} ${AGENT_WS_URL}
                   --wallet-type indy 
                   --wallet-storage-type postgres_storage
                   --wallet-storage-config "$(eval echo \"${WALLET_STORAGE_CONFIGURATION}\")"
@@ -293,8 +240,6 @@ objects:
                       key: seed
                 - name: ACAPY_GENESIS_URL
                   value: ${GENESIS_FILE_URL}
-                - name: ACAPY_ENDPOINT
-                  value: ${AGENT_URL}
                 - name: ACAPY_READ_ONLY_LEDGER
                   value: ${AGENT_READ_ONLY_LEDGER}
               image: " "
@@ -386,17 +331,12 @@ parameters:
     displayName: Service Role
     description: The role of the email verification service within the application - used for Network Policies
     required: true
-    value: service
-  - name: APPLICATION_ADMIN_DOMAIN
-    displayName: Application Admin Endpoint Hostname
-    description: The exposed admin hostname that will route to the service, if left blank a value will be defaulted.
-    required: false
-    value: aries-mediator-agent-admin-dev.apps.silver.devops.gov.bc.ca
-  - name: APPLICATION_DOMAIN
-    displayName: Application Hostname
-    description: The exposed hostname that will route to the service, if left blank a value will be defaulted.
-    required: false
-    value: aries-mediator-agent-dev.apps.silver.devops.gov.bc.ca
+    value: controller
+  - name: PROXY_ROLE
+    displayName: Proxy Role
+    description: The role of the nginx proxy within the application - used for Network Policies
+    required: true
+    value: proxy
   - name: IMAGE_NAMESPACE
     displayName: Namespace containing application images.
     required: true
@@ -409,7 +349,7 @@ parameters:
   - name: API_HOST
     displayName: Name of the API container, used for labels 
     required: true
-    value: aries-mediator-service
+    value: aries-mediator-controller
   - name: ADMIN_API_KEY
     displayName: Agent Admin API Key
     description: The key used to authenticate client requests to the admin api.
@@ -440,7 +380,7 @@ parameters:
     displayName: Controller Webhook
     required: true
     description: Controller Webhook
-    value: http://aries-mediator-service:3010/webhooks
+    value: http://aries-mediator-controller:3010/webhooks
   - name: ACAPY_WALLET_STORAGE_CONFIG
     displayName: Wallet Storage Configuration
     required: true
@@ -483,6 +423,11 @@ parameters:
     description: The URL for the site
     required: true
     value: https://aries-mediator-agent-dev.apps.silver.devops.gov.bc.ca
+  - name: AGENT_WS_URL
+    displayName: Site URL
+    description: The URL for the site
+    required: true
+    value: wss://aries-mediator-agent-dev.apps.silver.devops.gov.bc.ca 
   - name: GENESIS_FILE_URL
     displayName: Genesis File URL
     description: The URL from which the genesis file can be downloaded.

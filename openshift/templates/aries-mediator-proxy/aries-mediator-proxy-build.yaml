@@ -1,0 +1,64 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name: ${NAME}-imagestream-template
+objects:
+  - kind: ImageStream
+    apiVersion: v1
+    metadata:
+      name: ${NAME}
+      labels:
+        name: ${NAME}
+        app: ${APP_NAME}
+        app-group: ${APP_GROUP}
+    spec:
+      runPolicy: SerialLatestOnly
+      tags:
+        - name: ${OUTPUT_IMAGE_TAG}
+          annotations: null
+          from:
+            kind: ${SOURCE_IMAGE_KIND}
+            name: ${SOURCE_IMAGE_REGISTRY}${SOURCE_IMAGE_NAME}:${SOURCE_IMAGE_TAG}
+          importPolicy:
+            scheduled: true
+parameters:
+  - name: NAME
+    displayName: Name
+    description: The name assigned to all of the frontend objects defined in this template.  You should keep this as default unless your know what your doing.
+    required: true
+    value: aries-mediator-proxy
+  - name: APP_NAME
+    displayName: App Name
+    description: Used to group components together in the OpenShift console.
+    required: true
+    value: aries-mediator-proxy
+  - name: APP_GROUP
+    displayName: App Group
+    description: The name assigned to all of the deployments in this project.
+    required: true
+    value: aries-mediator-proxy
+  - name: OUTPUT_IMAGE_TAG
+    displayName: Output Image Tag
+    description: The tag given to the built image.
+    required: true
+    value: latest
+  - name: SOURCE_IMAGE_KIND
+    displayName: Source Image Kind
+    description: The 'kind' (type) of the  source image; typically ImageStreamTag, or DockerImage.
+    required: true
+    value: DockerImage
+  - name: SOURCE_IMAGE_NAME
+    displayName: Source Image Name
+    description: The name of the source image.
+    required: true
+    value: caddy
+  - name: SOURCE_IMAGE_TAG
+    displayName: Source Image Tag
+    description: The tag of the source image.
+    required: true
+    value: latest
+  - name: SOURCE_IMAGE_REGISTRY
+    displayName: Source Image Registry
+    description: The name of the Source Image Registry.
+    required: false
+    value: docker-remote.artifacts.developer.gov.bc.ca/
