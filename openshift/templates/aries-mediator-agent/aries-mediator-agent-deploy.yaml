@@ -13,7 +13,7 @@ objects:
         app: ${APP_NAME}${SUFFIX}
         env: ${TAG_NAME}
     spec:
-      description: Allow mediator agent ports to be accessed.
+      description: Allow mediator agent ports to be accessed by controller and caddy proxy.
       ingress:
         - from:
             - podSelector:
@@ -28,23 +28,6 @@ objects:
           ports:
             - protocol: TCP
               port: ${{INDY_ADMIN_PORT}}
-      podSelector:
-        matchLabels:
-          role: ${ROLE}
-          app: ${APP_NAME}${SUFFIX}
-          env: ${TAG_NAME}
-
-  - kind: NetworkPolicy
-    apiVersion: networking.k8s.io/v1
-    metadata:
-      name: ${NAME}${SUFFIX}-proxy
-      labels:
-        name: ${NAME}${SUFFIX}-proxy
-        app: ${APP_NAME}${SUFFIX}
-        env: ${TAG_NAME}
-    spec:
-      description: Allow mediator agent ports to be accessed.
-      ingress:
         - from:
             - podSelector:
                 matchLabels:
