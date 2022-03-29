@@ -346,10 +346,6 @@ parameters:
     description: Enable/Disable the read only ledger flag.  Controls the inclusion/exclusion of the agent '--read-only-ledger' startup parameter.  Defaults to disabled.
     required: true
     value: "false"
-  - name: API_HOST
-    displayName: Name of the API container, used for labels 
-    required: true
-    value: aries-mediator-controller
   - name: ADMIN_API_KEY
     displayName: Agent Admin API Key
     description: The key used to authenticate client requests to the admin api.
@@ -376,11 +372,6 @@ parameters:
     required: true
     description: Argument file location
     value: ./configs/mediator-auto-accept.yml
-  - name: MEDIATOR_CONTROLLER_WEBHOOK
-    displayName: Controller Webhook
-    required: true
-    description: Controller Webhook
-    value: http://aries-mediator-controller:3010/webhooks
   - name: ACAPY_WALLET_STORAGE_CONFIG
     displayName: Wallet Storage Configuration
     required: true
