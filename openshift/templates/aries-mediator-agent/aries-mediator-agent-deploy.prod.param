@@ -10,7 +10,6 @@
 # SUFFIX=
 # ROLE=agent
 # SERVICE_ROLE=controller
-# API_HOST=aries-mediator-controller
 # IMAGE_NAMESPACE=4a9599-tools
 # AGENT_READ_ONLY_LEDGER=false
 # ADMIN_API_KEY=[a-zA-Z0-9]{32}
@@ -18,7 +17,6 @@ TAG_NAME=prod
 # WALLET_HOST=aries-mediator-db
 # WALLET_PORT=5432
 # MEDIATOR_ARG_FILE=./configs/mediator-auto-accept.yml
-# MEDIATOR_CONTROLLER_WEBHOOK=http://aries-mediator-controller:3010/webhooks
 # ACAPY_WALLET_STORAGE_CONFIG='{\"url\":\"${POSTGRESQL_WALLET_HOST}:${POSTGRESQL_WALLET_PORT}\",\"wallet_scheme\":\"DatabasePerWallet\"}'
 # ACAPY_WALLET_STORAGE_CREDS='{\"account\":\"${POSTGRESQL_WALLET_USER}\",\"password\":\"${POSTGRESQL_WALLET_PASSWORD}\",\"admin_account\":\"postgres\",\"admin_password\":\"${POSTGRESQL_WALLET_ADMIN_PASSWORD}\"}'
 # INDY_ADMIN_PORT=3002
