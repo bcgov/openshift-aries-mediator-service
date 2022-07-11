@@ -172,6 +172,7 @@ objects:
                   --inbound-transport ws 0.0.0.0 ${MEDIATOR_AGENT_WS_IN_PORT} 
                   --outbound-transport ws 
                   --outbound-transport http 
+                  --emit-new-didcomm-prefix 
                   --endpoint ${AGENT_URL} ${AGENT_WS_URL}
                   --wallet-type indy 
                   --wallet-storage-type postgres_storage
