@@ -9,5 +9,5 @@ GIT_REPO_URL=https://github.com/hyperledger/aries-mediator-service.git
 GIT_REF=main
 SOURCE_CONTEXT_DIR=
 DOCKER_FILE_PATH=./acapy/Dockerfile.acapy
-SOURCE_IMAGE=docker-remote.artifacts.developer.gov.bc.ca/bcgovimages/von-image:py36-1.16-1
+SOURCE_IMAGE=artifacts.developer.gov.bc.ca/docker-remote/bcgovimages/von-image:py36-1.16-1
 OUTPUT_IMAGE_TAG=latest
