@@ -1,5 +1,5 @@
 kind: Template
-apiVersion: v1
+apiVersion: template.openshift.io/v1
 metadata:
   name: ${NAME}-imagestream-template
 objects:
@@ -61,4 +61,4 @@ parameters:
     displayName: Source Image Registry
     description: The name of the Source Image Registry.
     required: false
-    value: docker-remote.artifacts.developer.gov.bc.ca/
+    value: artifacts.developer.gov.bc.ca/docker-remote/
