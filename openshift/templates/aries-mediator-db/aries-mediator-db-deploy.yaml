@@ -307,7 +307,7 @@ parameters:
     displayName: Persistent Volume Size
     description: The size of the persistent volume , e.g. 512Mi, 1Gi, 2Gi.
     required: true
-    value: 5Gi
+    value: 1Gi
   - name: PERSISTENT_VOLUME_CLASS
     displayName: Persistent Volume Class name
     description: The class of the volume; gluster-file, gluster-block, gluster-file-db
