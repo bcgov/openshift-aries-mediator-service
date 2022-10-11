@@ -78,25 +78,6 @@ objects:
       selector:
         name: ${NAME}${SUFFIX}
 
-  - kind: PersistentVolumeClaim
-    apiVersion: v1
-    metadata:
-      name: ${NAME}${SUFFIX}
-      labels:
-        app: ${APP_NAME}${SUFFIX}
-        name: ${NAME}${SUFFIX}
-        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
-        app-group: ${APP_GROUP}
-        role: ${ROLE}
-        env: ${TAG_NAME}
-    spec:
-      accessModes:
-        - ReadWriteMany
-      resources:
-        requests:
-          storage: ${PERSISTENT_VOLUME_SIZE}
-      storageClassName: ${PERSISTENT_VOLUME_CLASS}
-
   - kind: Secret
     apiVersion: v1
     metadata:
@@ -273,18 +254,11 @@ objects:
                   memory: ${MEMORY_REQUEST}
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
-              volumeMounts:
-                - name: ${NAME}${SUFFIX}-data
-                  mountPath: ${MOUNT_PATH}
           dnsPolicy: ClusterFirst
           restartPolicy: Always
           schedulerName: default-scheduler
           securityContext: {}
           terminationGracePeriodSeconds: 30
-          volumes:
-            - name: ${NAME}${SUFFIX}-data
-              persistentVolumeClaim:
-                claimName: ${NAME}${SUFFIX}
       triggers:
         - type: ConfigChange
         - type: ImageChange
@@ -435,21 +409,6 @@ parameters:
     description: Log Level
     required: true
     value: INFO
-  - name: MOUNT_PATH
-    displayName: Mount Path
-    description: The path to mount the persistent volume.
-    required: true
-    value: /home/indy/.indy_client/wallet
-  - name: PERSISTENT_VOLUME_SIZE
-    displayName: Persistent Volume Size
-    description: The size of the persistent volume , e.g. 512Mi, 1Gi, 2Gi.
-    required: true
-    value: 5Gi
-  - name: PERSISTENT_VOLUME_CLASS
-    displayName: Persistent Volume Class name
-    description: The class of the volume; gluster-file, gluster-block, gluster-file-db
-    required: false
-    value: netapp-file-standard
   - name: CPU_REQUEST
     displayName: Resources CPU Request
     description: The resources CPU request (in cores) for this build.
