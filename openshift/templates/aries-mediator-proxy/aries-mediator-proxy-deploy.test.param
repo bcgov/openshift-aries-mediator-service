@@ -23,6 +23,6 @@ APPLICATION_DOMAIN=aries-mediator-agent-test.apps.silver.devops.gov.bc.ca
 # MIN_REPLICAS=2
 # MAX_REPLICAS=16
 # CPU_REQUEST=150m
-# CPU_LIMIT=300m
+# CPU_LIMIT=250m
 # MEMORY_REQUEST=256Mi
 # MEMORY_LIMIT=512Mi
