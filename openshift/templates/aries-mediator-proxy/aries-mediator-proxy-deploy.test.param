@@ -9,6 +9,7 @@ TAG_NAME=test
 # AGENT_HOST=aries-mediator-agent
 APPLICATION_ADMIN_DOMAIN=aries-mediator-agent-admin-test.apps.silver.devops.gov.bc.ca
 APPLICATION_DOMAIN=aries-mediator-agent-test.apps.silver.devops.gov.bc.ca
+# CERTBOT_MANAGED_ROUTE=false
 # AGENT_ADMIN_PORT=3002
 # AGENT_WS_PORT=3001
 # AGENT_PORT=3000
