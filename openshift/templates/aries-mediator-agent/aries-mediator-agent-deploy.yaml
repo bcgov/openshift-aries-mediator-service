@@ -148,7 +148,6 @@ objects:
                 - -c
                 - $(echo aca-py start --auto-provision 
                   --arg-file ${MEDIATOR_ARG_FILE} 
-                  --label "${MEDIATOR_AGENT_LABEL}" 
                   --inbound-transport http 0.0.0.0 ${MEDIATOR_AGENT_HTTP_IN_PORT} 
                   --inbound-transport ws 0.0.0.0 ${MEDIATOR_AGENT_WS_IN_PORT} 
                   --outbound-transport ws 
@@ -205,8 +204,10 @@ objects:
                     secretKeyRef:
                       name: ${NAME}${SUFFIX}-api
                       key: admin-api-key
-                - name: MEDIATOR_AGENT_LABEL
-                  value: ${DISPLAY_LABEL}
+                - name: ACAPY_LABEL
+                  value: ${ACAPY_LABEL}
+                - name: ACAPY_INVITE_LABEL
+                  value: ${ACAPY_INVITE_LABEL}
                 - name: MEDIATOR_ENDPOINT_URL
                   value: ${AGENT_URL}
                 - name: MEDIATOR_ARG_FILE
@@ -399,9 +400,14 @@ parameters:
     description: The URL from which the genesis file can be downloaded.
     required: true
     value: https://raw.githubusercontent.com/sovrin-foundation/sovrin/stable/sovrin/pool_transactions_sandbox_genesis
-  - name: DISPLAY_LABEL
+  - name: ACAPY_LABEL
     displayName: Display Label
     description: Display label
+    required: true
+    value: Mediator
+  - name: ACAPY_INVITE_LABEL
+    displayName: Invite Label
+    description: Invite label
     required: true
     value: Mediator
   - name: LOG_LEVEL
