@@ -20,6 +20,9 @@
 # APP_NAME=aries-mediator-service
 # APP_GROUP=aries-mediator-service
 # IMAGE_NAMESPACE=4a9599-tools
+# ROUTE_TIMEOUT=60s
+# ROUTE_BALANCING=source
+# SESSION_AFFINITY=ClientIP
 # MIN_REPLICAS=3
 # MAX_REPLICAS=6
 # CPU_REQUEST=10m

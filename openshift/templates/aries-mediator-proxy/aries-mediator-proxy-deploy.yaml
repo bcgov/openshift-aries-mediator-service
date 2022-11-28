@@ -46,6 +46,7 @@ objects:
         certbot-managed: ${CERTBOT_MANAGED_ROUTE}
       annotations:
         haproxy.router.openshift.io/timeout: ${ROUTE_TIMEOUT}
+        haproxy.router.openshift.io/balance: ${ROUTE_BALANCING}
     spec:
       host: ${APPLICATION_ADMIN_DOMAIN}
       port:
@@ -71,6 +72,7 @@ objects:
         certbot-managed: ${CERTBOT_MANAGED_ROUTE}
       annotations:
         haproxy.router.openshift.io/timeout: ${ROUTE_TIMEOUT}
+        haproxy.router.openshift.io/balance: ${ROUTE_BALANCING}
     spec:
       host: ${APPLICATION_DOMAIN}
       port:
@@ -105,6 +107,7 @@ objects:
           targetPort: ${{CADDY_AGENT_ADMIN_PORT}}
       selector:
         name: ${NAME}${SUFFIX}
+      sessionAffinity: ${SESSION_AFFINITY}
 
   - kind: DeploymentConfig
     apiVersion: v1
@@ -339,6 +342,22 @@ parameters:
     required: true
     description: The namespace of the OpenShift project containing the imagestream for the application.
     value: 4a9599-tools
+
+  - name: ROUTE_TIMEOUT
+    displayName: Route Timeout
+    description: Route timeout.
+    required: true
+    value: 60s
+  - name: ROUTE_BALANCING
+    displayName: Route Balancing
+    description: Route Balancing; random, source, roundrobin, or leastconn.
+    required: true
+    value: random
+  - name: SESSION_AFFINITY
+    displayName: Session Affinity
+    description: Session Affinity; None or ClientIP
+    required: true
+    value: None
 
   - name: MIN_REPLICAS
     displayName: Minimum Replicas
