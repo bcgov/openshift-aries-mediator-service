@@ -57,7 +57,7 @@ objects:
         kind: Service
         name: ${NAME}${SUFFIX}
         weight: 100
-  
+
   - kind: Route
     apiVersion: v1
     metadata:
@@ -191,7 +191,7 @@ objects:
                 - name: CADDY_AGENT_ADMIN_IN_PORT
                   value: ${CADDY_AGENT_ADMIN_PORT}
                 - name: AGENT_HOST
-                  value: ${AGENT_HOST} 
+                  value: ${AGENT_HOST}
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
@@ -205,21 +205,39 @@ objects:
                   subPath: ${CONFIG_FILE_NAME}
 
   - kind: HorizontalPodAutoscaler
-    apiVersion: autoscaling/v1
+    apiVersion: autoscaling/v2
     metadata:
       name: ${NAME}${SUFFIX}
       labels:
         name: ${NAME}${SUFFIX}
         app: ${APP_NAME}${SUFFIX}
+        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
         app-group: ${APP_GROUP}
         role: ${ROLE}
         env: ${TAG_NAME}
     spec:
       scaleTargetRef:
+        apiVersion: apps.openshift.io/v2
         kind: DeploymentConfig
         name: ${NAME}${SUFFIX}
       minReplicas: ${{MIN_REPLICAS}}
       maxReplicas: ${{MAX_REPLICAS}}
+      metrics:
+        - type: Resource
+          resource:
+            name: memory
+            target:
+              type: Utilization
+              averageUtilization: 75
+        - type: Resource
+          resource:
+            name: cpu
+            target:
+              type: Utilization
+              averageUtilization: 80
+      behavior:
+        scaleDown:
+          stabilizationWindowSeconds: 300
 
 parameters:
   - name: NAME
@@ -310,7 +328,7 @@ parameters:
     displayName: Suffix
     description: A name suffix used for all objects
     required: false
-    value: 
+    value:
   - name: APP_GROUP
     displayName: App Group
     description: The name assigned to all of the deployments in this project.
@@ -326,12 +344,12 @@ parameters:
     displayName: Minimum Replicas
     description: The minimum number of pods to have running.
     required: true
-    value: "2"
+    value: "3"
   - name: MAX_REPLICAS
     displayName: Maximum Replicas
     description: The maximum number of pods to have running.
     required: true
-    value: "16"
+    value: "6"
 
   - name: CPU_REQUEST
     displayName: Resources CPU Request
@@ -342,14 +360,14 @@ parameters:
     displayName: Resources CPU Limit
     description: The resources CPU limit (in cores) for this build.
     required: true
-    value: 300m
+    value: 100m
   - name: MEMORY_REQUEST
     displayName: Resources Memory Request
     description: The resources Memory request (in Mi, Gi, etc) for this build.
     required: true
-    value: 10Mi
+    value: 24Mi
   - name: MEMORY_LIMIT
     displayName: Resources Memory Limit
     description: The resources Memory limit (in Mi, Gi, etc) for this build.
     required: true
-    value: 512Mi
+    value: 64Mi
