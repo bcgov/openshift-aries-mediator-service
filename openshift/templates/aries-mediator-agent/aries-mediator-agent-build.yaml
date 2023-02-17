@@ -21,23 +21,33 @@ objects:
         - type: ImageChange
         - type: ConfigChange
       runPolicy: Serial
-      source:
-        type: Git
-        git:
-          uri: ${GIT_REPO_URL}
-          ref: ${GIT_REF}
-        contextDir: ${SOURCE_CONTEXT_DIR}
-      strategy:
-        type: Docker
-        dockerStrategy:
-          from:
-            kind: DockerImage
-            name: ${SOURCE_IMAGE}
-          dockerfilePath: ${DOCKER_FILE_PATH}
+    strategy:
+      type: Docker
+    source:
+      type: Git
+      git:
+        uri: "https://github.com/bcgov/openshift-aries-mediator-service.git"
+        ref: main
       output:
         to:
           kind: ImageStreamTag
           name: ${NAME}:${OUTPUT_IMAGE_TAG}
+      dockerfile: >
+        FROM
+        artifacts.developer.gov.bc.ca/github-docker-remote/hyperledger/aries-cloudagent-python:py3.9-indy-1.16.0-0.8.0-rc0
+
+        USER root
+
+        # The root group needs access the directories under $HOME/.indy_client for
+        # the container to function in OpenShift. Also ensure the permissions on 
+        # python 'site-packages' folder are set correctly.
+
+        RUN chown -R indy:root $HOME/.indy_client \
+            && chmod -R ug+rw $HOME/log $HOME/ledger $HOME/.aries_cloudagent $HOME/.cache $HOME/.indy-cli $HOME/.indy_client \
+            && chmod +rx $(python -m site --user-site)
+
+        USER $user
+
 parameters:
   - name: NAME
     displayName: Name
@@ -48,37 +58,12 @@ parameters:
     displayName: Suffix
     description: A name suffix used for all objects
     required: false
-    value: 
+    value:
   - name: APP_NAME
     displayName: App Name
     description: Used to group components together.
     required: true
     value: aries-mediator-service
-  - name: GIT_REPO_URL
-    displayName: Git Repo URL
-    description: The URL to your GIT repo.
-    required: true
-    value: https://github.com/hyperledger/aries-mediator-service.git
-  - name: GIT_REF
-    displayName: Git Reference
-    description: The git reference or branch.
-    required: true
-    value: main
-  - name: SOURCE_CONTEXT_DIR
-    displayName: Source Context Directory
-    description: The source context directory.
-    required: false
-    value: ''
-  - name: DOCKER_FILE_PATH
-    displayName: Docker File Path
-    description: The path to the docker file defining the build.
-    required: false
-    value: ./acapy/Dockerfile.acapy
-  - name: SOURCE_IMAGE
-    displayName: Source Image
-    description: The fully-qualified name of the source image for this component. 
-    required: true
-    value: artifacts.developer.gov.bc.ca/docker-remote/bcgovimages/von-image:py36-1.16-1
   - name: OUTPUT_IMAGE_TAG
     displayName: Output Image Tag
     description: The tag given to the built image.
