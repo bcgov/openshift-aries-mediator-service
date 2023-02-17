@@ -93,7 +93,7 @@ objects:
       seed: ${WALLET_SEED}
       key: ${WALLET_KEY}
     type: Opaque
-  
+
   - kind: Secret
     apiVersion: v1
     metadata:
@@ -146,20 +146,20 @@ objects:
               command:
                 - bash
                 - -c
-                - $(echo aca-py start --auto-provision 
-                  --arg-file ${MEDIATOR_ARG_FILE} 
-                  --inbound-transport http 0.0.0.0 ${MEDIATOR_AGENT_HTTP_IN_PORT} 
-                  --inbound-transport ws 0.0.0.0 ${MEDIATOR_AGENT_WS_IN_PORT} 
-                  --outbound-transport ws 
-                  --outbound-transport http 
-                  --emit-new-didcomm-prefix 
+                - $(echo aca-py start --auto-provision
+                  --arg-file ${MEDIATOR_ARG_FILE}
+                  --inbound-transport http 0.0.0.0 ${MEDIATOR_AGENT_HTTP_IN_PORT}
+                  --inbound-transport ws 0.0.0.0 ${MEDIATOR_AGENT_WS_IN_PORT}
+                  --outbound-transport ws
+                  --outbound-transport http
+                  --emit-new-didcomm-prefix
                   --endpoint ${AGENT_URL} ${AGENT_WS_URL}
-                  --wallet-type indy 
+                  --wallet-type indy
                   --wallet-storage-type postgres_storage
                   --wallet-storage-config "$(eval echo \"${WALLET_STORAGE_CONFIGURATION}\")"
                   --wallet-storage-creds "$(eval echo \"${WALLET_STORAGE_CREDENTIALS}\")"
-                  --admin 0.0.0.0 ${MEDIATOR_AGENT_HTTP_ADMIN_PORT} 
-                  --admin-api-key ${MEDIATOR_AGENT_ADMIN_MODE} 
+                  --admin 0.0.0.0 ${MEDIATOR_AGENT_HTTP_ADMIN_PORT}
+                  --admin-api-key ${MEDIATOR_AGENT_ADMIN_MODE}
                   --webhook-url ${MEDIATOR_CONTROLLER_WEBHOOK}
                   );
               env:
@@ -226,6 +226,10 @@ objects:
                 - name: ACAPY_READ_ONLY_LEDGER
                   value: ${AGENT_READ_ONLY_LEDGER}
               image: " "
+              volumeMounts:
+                - name: config
+                  mountPath: /home/indy/configs/mediator-auto-accept.yml
+                  subPath: mediator-auto-accept.yml
               ports:
                 - containerPort: ${{INDY_ADMIN_PORT}}
                   protocol: TCP
@@ -260,6 +264,10 @@ objects:
           schedulerName: default-scheduler
           securityContext: {}
           terminationGracePeriodSeconds: 30
+          volumes:
+            - name: config
+              configMap:
+                name: mediator-config
       triggers:
         - type: ConfigChange
         - type: ImageChange
@@ -307,6 +315,38 @@ objects:
         scaleDown:
           stabilizationWindowSeconds: 300
 
+  - kind: ConfigMap
+    apiVersion: v1
+    metadata:
+      name: mediator-config
+    data:
+      mediator-auto-accept.yml: |-
+        # General settings for mediator agent
+
+        # Mediator does not use a ledger
+        no-ledger: true
+
+        # Wallet
+        wallet-type: indy
+        wallet-name: mediator
+        wallet-key: insecure, for testing purposes only
+        auto-provision: true
+
+        # Mediation
+        open-mediation: true
+        enable-undelivered-queue: true
+
+        # Connections
+        debug-connections: true
+        auto-accept-invites: true
+        auto-accept-requests: true
+        auto-ping-connection: true
+
+        # Print an admin invite
+        connections-invite: true
+        invite-label: "Mediator"
+        invite-multi-use: true
+
 parameters:
   - name: NAME
     displayName: Name
@@ -332,7 +372,7 @@ parameters:
     displayName: Suffix
     description: A name suffix used for all objects
     required: false
-    value: ''
+    value: ""
   - name: ROLE
     displayName: Role
     description: The role of this service within the application - used for Network Policies
@@ -429,7 +469,7 @@ parameters:
     displayName: Site URL
     description: The URL for the site
     required: true
-    value: wss://aries-mediator-agent-dev.apps.silver.devops.gov.bc.ca 
+    value: wss://aries-mediator-agent-dev.apps.silver.devops.gov.bc.ca
   - name: GENESIS_FILE_URL
     displayName: Genesis File URL
     description: The URL from which the genesis file can be downloaded.
