@@ -226,10 +226,6 @@ objects:
                 - name: ACAPY_READ_ONLY_LEDGER
                   value: ${AGENT_READ_ONLY_LEDGER}
               image: " "
-              volumeMounts:
-                - name: config
-                  mountPath: /home/indy/configs/mediator-auto-accept.yml
-                  subPath: mediator-auto-accept.yml
               ports:
                 - containerPort: ${{INDY_ADMIN_PORT}}
                   protocol: TCP
@@ -257,6 +253,10 @@ objects:
                 requests:
                   cpu: ${CPU_REQUEST}
                   memory: ${MEMORY_REQUEST}
+              volumeMounts:
+                - name: ${NAME}${SUFFIX}-config-volume
+                  mountPath: ${CONFIG_MOUNT_PATH}${CONFIG_FILE_NAME}
+                  subPath: ${CONFIG_FILE_NAME}
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
           dnsPolicy: ClusterFirst
@@ -265,9 +265,12 @@ objects:
           securityContext: {}
           terminationGracePeriodSeconds: 30
           volumes:
-            - name: config
+            - name: ${NAME}${SUFFIX}-config-volume
               configMap:
-                name: mediator-config
+                name: ${CONFIG_MAP_NAME}${SUFFIX}
+                items:
+                  - key: ${CONFIG_FILE_NAME}
+                    path: ${CONFIG_FILE_NAME}
       triggers:
         - type: ConfigChange
         - type: ImageChange
@@ -314,38 +317,6 @@ objects:
       behavior:
         scaleDown:
           stabilizationWindowSeconds: 300
-
-  - kind: ConfigMap
-    apiVersion: v1
-    metadata:
-      name: mediator-config
-    data:
-      mediator-auto-accept.yml: |-
-        # General settings for mediator agent
-
-        # Mediator does not use a ledger
-        no-ledger: true
-
-        # Wallet
-        wallet-type: indy
-        wallet-name: mediator
-        wallet-key: insecure, for testing purposes only
-        auto-provision: true
-
-        # Mediation
-        open-mediation: true
-        enable-undelivered-queue: true
-
-        # Connections
-        debug-connections: true
-        auto-accept-invites: true
-        auto-accept-requests: true
-        auto-ping-connection: true
-
-        # Print an admin invite
-        connections-invite: true
-        invite-label: "Mediator"
-        invite-multi-use: true
 
 parameters:
   - name: NAME
@@ -418,6 +389,21 @@ parameters:
     description: The db port of the Postgres deployment
     required: true
     value: "5432"
+  - name: CONFIG_MOUNT_PATH
+    displayName: Config Mount Path
+    description: Location for the config file inside the mediator container
+    required: true
+    value: /home/indy/configs/
+  - name: CONFIG_FILE_NAME
+    displayName: Config File Path
+    description: Name of the mediator config file
+    required: true
+    value: mediator-auto-accept.yml
+  - name: CONFIG_MAP_NAME
+    displayName: Config Map Name
+    description: name of the mediator config map
+    required: true
+    value: mediator-config
   - name: MEDIATOR_ARG_FILE
     displayName: Argument File
     required: true
@@ -495,7 +481,7 @@ parameters:
     displayName: Minimum Replicas
     description: The minimum number of pods to have running.
     required: true
-    value: "3"
+    value: "1"
   - name: MAX_REPLICAS
     displayName: Maximum Replicas
     description: The maximum number of pods to have running.

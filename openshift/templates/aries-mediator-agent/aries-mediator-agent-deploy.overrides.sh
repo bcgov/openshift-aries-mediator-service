@@ -10,6 +10,15 @@ fi
 # Special deployment parameters needed for injecting a user supplied settings into the deployment configuration
 # ----------------------------------------------------------------------------------------------------------------
 
+CONFIG_MAP_NAME=mediator-config
+SOURCE_FILE=$( dirname "$0" )/configs/mediator-auto-accept.yml
+
+OUTPUT_FORMAT=json
+OUTPUT_FILE=${CONFIG_MAP_NAME}-configmap_DeploymentConfig.json
+
+printStatusMsg "Generating ConfigMap; ${CONFIG_MAP_NAME} ..."
+generateConfigMap "${CONFIG_MAP_NAME}" "${SOURCE_FILE}" "${OUTPUT_FORMAT}" "${OUTPUT_FILE}"
+
 if createOperation; then
   # Ask the user to supply the sensitive parameters ...
   readParameter "WALLET_SEED - Please provide the indy wallet seed for the environment.  If left blank, a seed will be randomly generated using openssl:" WALLET_SEED $(generateSeed) "false"
