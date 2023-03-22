@@ -225,6 +225,11 @@ objects:
                   value: ${GENESIS_FILE_URL}
                 - name: ACAPY_READ_ONLY_LEDGER
                   value: ${AGENT_READ_ONLY_LEDGER}
+
+                - name: ACAPY_WS_HEARTBEAT_INTERVAL
+                  value: ${ACAPY_WS_HEARTBEAT_INTERVAL}
+                - name: ACAPY_WS_TIMEOUT_INTERVAL
+                  value: ${ACAPY_WS_TIMEOUT_INTERVAL}
               image: " "
               ports:
                 - containerPort: ${{INDY_ADMIN_PORT}}
@@ -368,6 +373,18 @@ parameters:
     description: Enable/Disable the read only ledger flag.  Controls the inclusion/exclusion of the agent '--read-only-ledger' startup parameter.  Defaults to disabled.
     required: true
     value: "false"
+
+  - name: ACAPY_WS_HEARTBEAT_INTERVAL
+    displayName: WebSocket Heartbeat Interval
+    description: WebSocket Heartbeat Interval in seconds
+    required: true
+    value: "15"
+  - name: ACAPY_WS_TIMEOUT_INTERVAL
+    displayName: WebSocket Timeout Interval
+    description: WebSocket Timeout Interval in seconds
+    required: true
+    value: "60"
+
   - name: ADMIN_API_KEY
     displayName: Agent Admin API Key
     description: The key used to authenticate client requests to the admin api.
