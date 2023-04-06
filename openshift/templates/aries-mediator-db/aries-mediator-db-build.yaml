@@ -37,19 +37,12 @@ objects:
           from:
             kind: ${SOURCE_IMAGE_KIND}
             name: ${SOURCE_IMAGE_REGISTRY}${SOURCE_IMAGE_NAME}:${SOURCE_IMAGE_TAG}
-          env:
-            - name: PIP_INDEX_URL
-              value: ${PIP_INDEX_URL}
       output:
         to:
           kind: ImageStreamTag
           name: ${NAME}:${OUTPUT_IMAGE_TAG}
       triggers:
         - type: ConfigChange
-      resources:
-        limits:
-          cpu: ${CPU_LIMIT}
-          memory: ${MEMORY_LIMIT}
 parameters:
   - name: NAME
     displayName: Name
@@ -70,7 +63,7 @@ parameters:
     displayName: Git Repo URL
     description: The URL to your GIT repo, don't use the this default unless your just experimenting.
     required: true
-    value: https://github.com/hyperledger/aries-mediator-service
+    value: https://github.com/bcgov/openshift-aries-mediator-service
   - name: GIT_REF
     displayName: Git Reference
     description: The git reference or branch.
@@ -80,43 +73,35 @@ parameters:
     displayName: Source Context Directory
     description: The source context directory.
     required: false
-    value: 
+    value: openshift/templates/aries-mediator-db/config
   - name: SOURCE_IMAGE_KIND
     displayName: Source Image Kind
     required: true
     description: The 'kind' (type) of the  source image; typically ImageStreamTag, or DockerImage.
     value: DockerImage
-  - name: SOURCE_IMAGE_NAME
-    displayName: Source Image Name
-    required: true
-    description: The name of the source image.
-    value: rhel8/postgresql-10
-  - name: SOURCE_IMAGE_TAG
-    displayName: Source Image Tag
-    required: true
-    description: The tag of the source image.
-    value: latest
-  - name: PIP_INDEX_URL
-    displayName: Custom PyPi Index URL
-    description: The custom PyPi index URL
-    value: ""
   - name: SOURCE_IMAGE_REGISTRY
     displayName: Source Image Registry
     description: The name of the Source Image Registry.
     required: false
-    value: registry.redhat.io/
+    # value: registry.redhat.io/
+    value: quay.io/
+    # value: quay.io/
+  - name: SOURCE_IMAGE_NAME
+    displayName: Source Image Name
+    required: true
+    description: The name of the source image.
+    # value: rhel9/postgresql-13
+    value: fedora/postgresql-14
+    # value: fedora/postgresql-15
+  - name: SOURCE_IMAGE_TAG
+    displayName: Source Image Tag
+    required: true
+    description: The tag of the source image.
+    # value: latest
+    value: '14'
+    # value: '15'
   - name: OUTPUT_IMAGE_TAG
     displayName: Output Image Tag
     description: The tag given to the built image.
     required: true
     value: latest
-  - name: CPU_LIMIT
-    displayName: Resources CPU Limit
-    description: The resources CPU limit (in cores) for this build.
-    required: true
-    value: "1"
-  - name: MEMORY_LIMIT
-    displayName: Resources Memory Limit
-    description: The resources Memory limit (in Mi, Gi, etc) for this build.
-    required: true
-    value: 4Gi
