@@ -79,7 +79,7 @@ parameters:
     displayName: Source Image
     description: The fully-qualified name of the source image for this component.
     required: true
-    value: artifacts.developer.gov.bc.ca/github-docker-remote/hyperledger/aries-cloudagent-python:py3.9-indy-1.16.0-0.8.0
+    value: artifacts.developer.gov.bc.ca/github-docker-remote/hyperledger/aries-cloudagent-python:py3.9-indy-1.16.0-0.8.1
   - name: OUTPUT_IMAGE_TAG
     displayName: Output Image Tag
     description: The tag given to the built image.
