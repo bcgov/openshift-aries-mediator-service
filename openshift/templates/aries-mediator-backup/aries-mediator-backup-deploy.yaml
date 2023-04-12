@@ -6,7 +6,7 @@ objects:
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
-      name: ${BACKUP_VOLUME_NAME}
+      name: ${BACKUP_VOLUME_NAME}${SUFFIX}
       labels:
         name: ${NAME}${SUFFIX}
         app: ${APP_NAME}${SUFFIX}
@@ -24,7 +24,7 @@ objects:
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
-      name: ${VERIFICATION_VOLUME_NAME}
+      name: ${VERIFICATION_VOLUME_NAME}${SUFFIX}
       labels:
         name: ${NAME}${SUFFIX}
         app: ${APP_NAME}${SUFFIX}
@@ -97,12 +97,12 @@ objects:
             env: ${TAG_NAME}
         spec:
           volumes:
-            - name: ${BACKUP_VOLUME_NAME}
+            - name: ${BACKUP_VOLUME_NAME}${SUFFIX}
               persistentVolumeClaim:
-                claimName: ${BACKUP_VOLUME_NAME}
-            - name: ${VERIFICATION_VOLUME_NAME}
+                claimName: ${BACKUP_VOLUME_NAME}${SUFFIX}
+            - name: ${VERIFICATION_VOLUME_NAME}${SUFFIX}
               persistentVolumeClaim:
-                claimName: ${VERIFICATION_VOLUME_NAME}
+                claimName: ${VERIFICATION_VOLUME_NAME}${SUFFIX}
             - name: ${NAME}${SUFFIX}-config-volume
               configMap:
                 name: ${CONFIG_MAP_NAME}${SUFFIX}
@@ -153,9 +153,9 @@ objects:
                   cpu: ${CPU_LIMIT}
                   memory: ${MEMORY_LIMIT}
               volumeMounts:
-                - name: ${BACKUP_VOLUME_NAME}
+                - name: ${BACKUP_VOLUME_NAME}${SUFFIX}
                   mountPath: ${BACKUP_DIR}
-                - name: ${VERIFICATION_VOLUME_NAME}
+                - name: ${VERIFICATION_VOLUME_NAME}${SUFFIX}
                   mountPath: ${VERIFICATION_VOLUME_MOUNT_PATH}
                 - name: ${NAME}${SUFFIX}-config-volume
                   mountPath: ${CONFIG_MOUNT_PATH}${CONFIG_FILE_NAME}
@@ -175,7 +175,7 @@ parameters:
     displayName: Suffix
     description: A name suffix used for all objects
     required: false
-    value: 
+    value:
   - name: APP_NAME
     displayName: App Name
     description: Used to group components together in the OpenShift console.
