@@ -1,1 +1,0 @@
-export ignore_templates="aries-mediator-backup-deploy"
