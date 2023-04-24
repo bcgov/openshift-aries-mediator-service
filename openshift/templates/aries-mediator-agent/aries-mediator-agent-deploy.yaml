@@ -152,21 +152,61 @@ objects:
                   --inbound-transport ws 0.0.0.0 ${MEDIATOR_AGENT_WS_IN_PORT}
                   --outbound-transport ws
                   --outbound-transport http
-                  --emit-new-didcomm-prefix
                   --endpoint ${AGENT_URL} ${AGENT_WS_URL}
-                  --wallet-type indy
-                  --wallet-storage-type postgres_storage
                   --wallet-storage-config "$(eval echo \"${WALLET_STORAGE_CONFIGURATION}\")"
                   --wallet-storage-creds "$(eval echo \"${WALLET_STORAGE_CREDENTIALS}\")"
                   --admin 0.0.0.0 ${MEDIATOR_AGENT_HTTP_ADMIN_PORT}
-                  --admin-api-key ${MEDIATOR_AGENT_ADMIN_MODE}
-                  --webhook-url ${MEDIATOR_CONTROLLER_WEBHOOK}
                   );
               env:
+
+                - name: ACAPY_EMIT_NEW_DIDCOMM_PREFIX
+                  value: ${ACAPY_EMIT_NEW_DIDCOMM_PREFIX}
+
+                - name: MEDIATOR_AGENT_HTTP_IN_PORT
+                  value: ${INDY_AGENT_PORT}
+                - name: MEDIATOR_AGENT_WS_IN_PORT
+                  value: ${INDY_AGENT_WS_PORT}
+                - name: MEDIATOR_AGENT_HTTP_ADMIN_PORT
+                  value: ${INDY_ADMIN_PORT}
+                - name: ACAPY_ADMIN_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}-api
+                      key: admin-api-key
+                - name: ACAPY_LABEL
+                  value: ${ACAPY_LABEL}
+                - name: ACAPY_INVITE_LABEL
+                  value: ${ACAPY_INVITE_LABEL}
+                - name: MEDIATOR_ENDPOINT_URL
+                  value: ${AGENT_URL}
+                - name: MEDIATOR_ARG_FILE
+                  value: ${MEDIATOR_ARG_FILE}
+                - name: LOG_LEVEL
+                  value: ${LOG_LEVEL}
+                - name: ACAPY_GENESIS_URL
+                  value: ${GENESIS_FILE_URL}
+                - name: ACAPY_READ_ONLY_LEDGER
+                  value: ${AGENT_READ_ONLY_LEDGER}
+
+                - name: ACAPY_WS_HEARTBEAT_INTERVAL
+                  value: ${ACAPY_WS_HEARTBEAT_INTERVAL}
+                - name: ACAPY_WS_TIMEOUT_INTERVAL
+                  value: ${ACAPY_WS_TIMEOUT_INTERVAL}
+
+                - name: ACAPY_WALLET_NAME
+                  value: ${NAME}${SUFFIX}-wallet
+                - name: ACAPY_WALLET_TYPE
+                  value: ${ACAPY_WALLET_TYPE}
+                - name: ACAPY_WALLET_STORAGE_TYPE
+                  value: ${ACAPY_WALLET_STORAGE_TYPE}
                 - name: POSTGRESQL_WALLET_HOST
                   value: ${WALLET_HOST}${SUFFIX}
                 - name: POSTGRESQL_WALLET_PORT
                   value: ${WALLET_PORT}
+                - name: WALLET_STORAGE_CONFIGURATION
+                  value: ${ACAPY_WALLET_STORAGE_CONFIG}
+                - name: WALLET_STORAGE_CREDENTIALS
+                  value: ${ACAPY_WALLET_STORAGE_CREDS}
                 - name: POSTGRESQL_WALLET_USER
                   valueFrom:
                     secretKeyRef:
@@ -187,49 +227,12 @@ objects:
                     secretKeyRef:
                       name: ${NAME}${SUFFIX}
                       key: key
-                - name: WALLET_STORAGE_CONFIGURATION
-                  value: ${ACAPY_WALLET_STORAGE_CONFIG}
-                - name: WALLET_STORAGE_CREDENTIALS
-                  value: ${ACAPY_WALLET_STORAGE_CREDS}
-                - name: ACAPY_WALLET_NAME
-                  value: ${NAME}${SUFFIX}-wallet
-                - name: MEDIATOR_AGENT_HTTP_IN_PORT
-                  value: ${INDY_AGENT_PORT}
-                - name: MEDIATOR_AGENT_WS_IN_PORT
-                  value: ${INDY_AGENT_WS_PORT}
-                - name: MEDIATOR_AGENT_HTTP_ADMIN_PORT
-                  value: ${INDY_ADMIN_PORT}
-                - name: MEDIATOR_AGENT_ADMIN_MODE
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}${SUFFIX}-api
-                      key: admin-api-key
-                - name: ACAPY_LABEL
-                  value: ${ACAPY_LABEL}
-                - name: ACAPY_INVITE_LABEL
-                  value: ${ACAPY_INVITE_LABEL}
-                - name: MEDIATOR_ENDPOINT_URL
-                  value: ${AGENT_URL}
-                - name: MEDIATOR_ARG_FILE
-                  value: ${MEDIATOR_ARG_FILE}
-                - name: MEDIATOR_CONTROLLER_WEBHOOK
-                  value: ${MEDIATOR_CONTROLLER_WEBHOOK}
-                - name: LOG_LEVEL
-                  value: ${LOG_LEVEL}
                 - name: ACAPY_WALLET_SEED
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}${SUFFIX}
                       key: seed
-                - name: ACAPY_GENESIS_URL
-                  value: ${GENESIS_FILE_URL}
-                - name: ACAPY_READ_ONLY_LEDGER
-                  value: ${AGENT_READ_ONLY_LEDGER}
 
-                - name: ACAPY_WS_HEARTBEAT_INTERVAL
-                  value: ${ACAPY_WS_HEARTBEAT_INTERVAL}
-                - name: ACAPY_WS_TIMEOUT_INTERVAL
-                  value: ${ACAPY_WS_TIMEOUT_INTERVAL}
               image: " "
               ports:
                 - containerPort: ${{INDY_ADMIN_PORT}}
@@ -385,6 +388,12 @@ parameters:
     required: true
     value: "60"
 
+  - name: ACAPY_EMIT_NEW_DIDCOMM_PREFIX
+    displayName: WebSocket Timeout Interval
+    description: Emit protocol messages with new DIDComm prefix; i.e., 'https://didcomm.org/' instead of (default) prefix 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/'.
+    required: true
+    value: "true"
+
   - name: ADMIN_API_KEY
     displayName: Agent Admin API Key
     description: The key used to authenticate client requests to the admin api.
@@ -396,16 +405,6 @@ parameters:
     description: The TAG name for this environment, e.g., dev, test, prod.
     required: true
     value: dev
-  - name: WALLET_HOST
-    displayName: Postgresql Host
-    description: The name of the Postgresql deployment
-    required: true
-    value: aries-mediator-db
-  - name: WALLET_PORT
-    displayName: Postgresql Port
-    description: The db port of the Postgres deployment
-    required: true
-    value: "5432"
   - name: CONFIG_MOUNT_PATH
     displayName: Config Mount Path
     description: Location for the config file inside the mediator container
@@ -426,16 +425,6 @@ parameters:
     required: true
     description: Argument file location
     value: ./configs/mediator-auto-accept.yml
-  - name: ACAPY_WALLET_STORAGE_CONFIG
-    displayName: Wallet Storage Configuration
-    required: true
-    description: Wallet storage configuration
-    value: '{\"url\":\"${POSTGRESQL_WALLET_HOST}:${POSTGRESQL_WALLET_PORT}\",\"wallet_scheme\":\"DatabasePerWallet\"}'
-  - name: ACAPY_WALLET_STORAGE_CREDS
-    displayName: Wallet Storage Credential Configuration
-    required: true
-    description: Wallet storage credential configuration
-    value: '{\"account\":\"${POSTGRESQL_WALLET_USER}\",\"password\":\"${POSTGRESQL_WALLET_PASSWORD}\",\"admin_account\":\"postgres\",\"admin_password\":\"${POSTGRESQL_WALLET_ADMIN_PASSWORD}\"}'
   - name: INDY_ADMIN_PORT
     displayName: Admin Port
     description: The admin port on which the service will listen.
@@ -451,6 +440,43 @@ parameters:
     description: The agent port on which the service will listen.
     required: true
     value: "3001"
+
+  # ===============================================================================
+  # Wallet Configuration
+  #--------------------------------------------------------------------------------
+  - name: ACAPY_WALLET_TYPE
+    displayName: Wallet Type
+    description:
+      The wallet type.  Supported internal storage types are 'basic' (memory), 'indy', and 'askar'.
+    required: false
+    value: 'askar'
+  - name: ACAPY_WALLET_STORAGE_TYPE
+    displayName: Wallet Storage Type
+    description:
+      The wallet storage type.  Your choice of 'postgres' or 'sqlite' at the moment.
+      If not defined, defaults to 'sqlite' for compatibility
+    required: false
+    value: postgres_storage
+  - name: WALLET_HOST
+    displayName: Postgresql Host
+    description: The name of the Postgresql deployment
+    required: true
+    value: aries-mediator-db
+  - name: WALLET_PORT
+    displayName: Postgresql Port
+    description: The db port of the Postgres deployment
+    required: true
+    value: "5432"
+  - name: ACAPY_WALLET_STORAGE_CONFIG
+    displayName: Wallet Storage Configuration
+    required: true
+    description: Wallet storage configuration
+    value: '{\"url\":\"${POSTGRESQL_WALLET_HOST}:${POSTGRESQL_WALLET_PORT}\",\"wallet_scheme\":\"DatabasePerWallet\"}'
+  - name: ACAPY_WALLET_STORAGE_CREDS
+    displayName: Wallet Storage Credential Configuration
+    required: true
+    description: Wallet storage credential configuration
+    value: '{\"account\":\"${POSTGRESQL_WALLET_USER}\",\"password\":\"${POSTGRESQL_WALLET_PASSWORD}\",\"admin_account\":\"postgres\",\"admin_password\":\"${POSTGRESQL_WALLET_ADMIN_PASSWORD}\"}'
   - name: WALLET_KEY
     displayName: Wallet Encryption Key
     description: The encryption key to be used for the wallets.  Needs to be base64 encoded.
@@ -463,6 +489,8 @@ parameters:
     required: true
     generate: expression
     from: "[a-zA-Z0-9]{32}"
+# ===============================================================================
+
   - name: AGENT_URL
     displayName: Site URL
     description: The URL for the site

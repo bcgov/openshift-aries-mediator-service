@@ -9,5 +9,5 @@ GIT_REPO_URL=https://github.com/hyperledger/aries-mediator-service.git
 GIT_REF=main
 SOURCE_CONTEXT_DIR=
 DOCKER_FILE_PATH=./acapy/Dockerfile.acapy
-SOURCE_IMAGE=artifacts.developer.gov.bc.ca/github-docker-remote/hyperledger/aries-cloudagent-python:py3.9-indy-1.16.0-0.8.0
+SOURCE_IMAGE=artifacts.developer.gov.bc.ca/github-docker-remote/hyperledger/aries-cloudagent-python:py3.9-indy-1.16.0-0.8.1
 OUTPUT_IMAGE_TAG=latest
