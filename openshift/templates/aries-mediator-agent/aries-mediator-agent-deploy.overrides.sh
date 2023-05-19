@@ -6,20 +6,23 @@ else
   _red='\033[0;31m'; _yellow='\033[1;33m'; _nc='\033[0m'; echo -e \\n"${_red}overrides.inc could not be found on the path.${_nc}\n${_yellow}Please ensure the openshift-developer-tools are installed on and registered on your path.${_nc}\n${_yellow}https://github.com/BCDevOps/openshift-developer-tools${_nc}"; exit 1;
 fi
 
-# Generate application config map
+# Generate profile config map
 # - To include all of the files in the application instance's profile directory.
 # Injected by genDepls.sh
 # - CONFIG_MAP_NAME
 # - SUFFIX
-
+# - DEPLOYMENT_ENV_NAME
+# - PROFILE
+PROFILE=${PROFILE:-default}
 CONFIG_MAP_NAME=${CONFIG_MAP_NAME:-mediator-config}
-SOURCE_FILE=$( dirname "$0" )/configs/mediator-auto-accept.yml
-
+CONFIG_ROOT=$( dirname "$0" )/config
 OUTPUT_FORMAT=json
 OUTPUT_FILE=${CONFIG_MAP_NAME}-configmap_DeploymentConfig.json
 
-printStatusMsg "Generating ConfigMap; ${CONFIG_MAP_NAME} ..."
-generateConfigMap "${CONFIG_MAP_NAME}${SUFFIX}" "${SOURCE_FILE}" "${OUTPUT_FORMAT}" "${OUTPUT_FILE}"
+# Generate the config map ...
+generateProfileConfigMap "${PROFILE}" "${DEPLOYMENT_ENV_NAME}" "${CONFIG_MAP_NAME}${SUFFIX}" "${CONFIG_ROOT}" "${OUTPUT_FORMAT}" "${OUTPUT_FILE}"
+
+unset SPECIALDEPLOYPARMS
 
 if createOperation; then
   # Ask the user to supply the sensitive parameters ...
