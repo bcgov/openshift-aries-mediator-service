@@ -1,19 +1,19 @@
 kind: Template
 apiVersion: template.openshift.io/v1
 metadata:
-  name: ${NAME}-build-template
+  name: ${NAME}${SUFFIX}-build-template
   creationTimestamp: null
 objects:
   - kind: ImageStream
     apiVersion: v1
     metadata:
-      name: ${NAME}
+      name: ${NAME}${SUFFIX}
       labels:
         app: ${APP_NAME}
   - kind: BuildConfig
     apiVersion: v1
     metadata:
-      name: ${NAME}
+      name: ${NAME}${SUFFIX}
       labels:
         app: ${APP_NAME}
     spec:
@@ -37,7 +37,7 @@ objects:
       output:
         to:
           kind: ImageStreamTag
-          name: ${NAME}:${OUTPUT_IMAGE_TAG}
+          name: ${NAME}${SUFFIX}:${OUTPUT_IMAGE_TAG}
 
 parameters:
   - name: NAME

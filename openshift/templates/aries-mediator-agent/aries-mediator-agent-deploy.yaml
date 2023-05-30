@@ -51,6 +51,33 @@ objects:
           app: ${APP_NAME}${SUFFIX}
           env: ${TAG_NAME}
 
+  - kind: NetworkPolicy
+    apiVersion: networking.k8s.io/v1
+    metadata:
+      name: allow-${NAME}${SUFFIX}-to-${REDIS_INSTANCE}
+      labels:
+        name: allow-${NAME}${SUFFIX}-to-${REDIS_INSTANCE}
+        app: ${APP_NAME}${SUFFIX}
+        env: ${TAG_NAME}
+    spec:
+      description: Allow mediator agent to access the redis cluster.
+      ingress:
+        - from:
+            - podSelector:
+                matchLabels:
+                  role: ${ROLE}
+                  app: ${APP_NAME}${SUFFIX}
+                  env: ${TAG_NAME}
+              namespaceSelector:
+                matchLabels:
+                  name: ${NAMESPACE_NAME}
+                  environment: ${TAG_NAME}
+      podSelector:
+        matchLabels:
+          role: ${REDIS_ROLE}
+          app: ${REDIS_INSTANCE}
+          statefulset: ${REDIS_INSTANCE}
+
   - kind: Service
     apiVersion: v1
     metadata:
@@ -156,6 +183,10 @@ objects:
                   --wallet-storage-config "$(eval echo \"${WALLET_STORAGE_CONFIGURATION}\")"
                   --wallet-storage-creds "$(eval echo \"${WALLET_STORAGE_CREDENTIALS}\")"
                   --admin 0.0.0.0 ${MEDIATOR_AGENT_HTTP_ADMIN_PORT}
+                  $([[ ! -z "${USE_PERSISTENT_QUEUE}" && "${USE_PERSISTENT_QUEUE,,}"=='true' ]] && echo "--plugin-config-value redis_queue.connection.connection_url=${REDIS_CONNECTION_STRING}")
+                  $([[ ! -z "${USE_PERSISTENT_QUEUE}" && "${USE_PERSISTENT_QUEUE,,}"=='true' ]] && echo "--plugin-config-value redis_queue.inbound.acapy_inbound_topic=${INBOUND_QUEUE}")
+                  $([[ ! -z "${USE_PERSISTENT_QUEUE}" && "${USE_PERSISTENT_QUEUE,,}"=='true' ]] && echo "--plugin-config-value redis_queue.inbound.acapy_direct_resp_topic=${INBOUND_DIRECT_RESPONSE_QUEUE}")
+                  $([[ ! -z "${USE_PERSISTENT_QUEUE}" && "${USE_PERSISTENT_QUEUE,,}"=='true' ]] && echo "--plugin-config-value redis_queue.outbound.acapy_outbound_topic=${OUTBOUND_QUEUE}")
                   );
               env:
 
@@ -180,9 +211,11 @@ objects:
                 - name: MEDIATOR_ENDPOINT_URL
                   value: ${AGENT_URL}
                 - name: MEDIATOR_ARG_FILE
-                  value: ${MEDIATOR_ARG_FILE}
+                  value: ${MEDIATOR_CONFIG_FILE_FOLDER}${MEDIATOR_CONFIG_FILE}
                 - name: LOG_LEVEL
                   value: ${LOG_LEVEL}
+                - name: RUST_LOG
+                  value: ${RUST_LOG}
                 - name: ACAPY_GENESIS_URL
                   value: ${GENESIS_FILE_URL}
                 - name: ACAPY_READ_ONLY_LEDGER
@@ -232,6 +265,24 @@ objects:
                     secretKeyRef:
                       name: ${NAME}${SUFFIX}
                       key: seed
+                - name: ACAPY_PLUGIN
+                  value: ${ACAPY_PLUGIN}
+                - name: ACAPY_PLUGIN_CONFIG
+                  value: ${ACAPY_PLUGIN_CONFIG}
+
+                - name: USE_PERSISTENT_QUEUE
+                  value: ${USE_PERSISTENT_QUEUE}
+                - name: REDIS_CONNECTION_STRING
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${REDIS_INSTANCE}
+                      key: connection-string
+                - name: INBOUND_QUEUE
+                  value: ${NAME}${SUFFIX}-inbound
+                - name: INBOUND_DIRECT_RESPONSE_QUEUE
+                  value: ${NAME}${SUFFIX}-inbound-direct-response
+                - name: OUTBOUND_QUEUE
+                  value: ${NAME}${SUFFIX}-outbound
 
               image: " "
               ports:
@@ -263,8 +314,11 @@ objects:
                   memory: ${MEMORY_REQUEST}
               volumeMounts:
                 - name: ${NAME}${SUFFIX}-config-volume
-                  mountPath: ${CONFIG_MOUNT_PATH}${CONFIG_FILE_NAME}
-                  subPath: ${CONFIG_FILE_NAME}
+                  mountPath: ${CONFIG_MOUNT_PATH}${MEDIATOR_CONFIG_FILE}
+                  subPath: ${MEDIATOR_CONFIG_FILE}
+                - name: ${NAME}${SUFFIX}-plugin-config-volume
+                  mountPath: ${CONFIG_MOUNT_PATH}${PLUGIN_CONFIG_FILE}
+                  subPath: ${PLUGIN_CONFIG_FILE}
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
           dnsPolicy: ClusterFirst
@@ -277,8 +331,14 @@ objects:
               configMap:
                 name: ${CONFIG_MAP_NAME}${SUFFIX}
                 items:
-                  - key: ${CONFIG_FILE_NAME}
-                    path: ${CONFIG_FILE_NAME}
+                  - key: ${MEDIATOR_CONFIG_FILE}
+                    path: ${MEDIATOR_CONFIG_FILE}
+            - name: ${NAME}${SUFFIX}-plugin-config-volume
+              configMap:
+                name: ${CONFIG_MAP_NAME}${SUFFIX}
+                items:
+                  - key: ${PLUGIN_CONFIG_FILE}
+                    path: ${PLUGIN_CONFIG_FILE}
       triggers:
         - type: ConfigChange
         - type: ImageChange
@@ -288,7 +348,7 @@ objects:
               - ${NAME}${SUFFIX}
             from:
               kind: ImageStreamTag
-              name: ${NAME}:${TAG_NAME}
+              name: ${NAME}${IMAGE_SUFFIX}:${TAG_NAME}
               namespace: ${IMAGE_NAMESPACE}
 
   - kind: HorizontalPodAutoscaler
@@ -351,7 +411,13 @@ parameters:
     displayName: Suffix
     description: A name suffix used for all objects
     required: false
-    value: ""
+    value:
+  - name: IMAGE_SUFFIX
+    displayName: Image Suffix
+    description: A image suffix used for all objects
+    required: false
+    value:
+
   - name: ROLE
     displayName: Role
     description: The role of this service within the application - used for Network Policies
@@ -367,6 +433,23 @@ parameters:
     description: The role of the nginx proxy within the application - used for Network Policies
     required: true
     value: proxy
+
+  - name: REDIS_ROLE
+    displayName: Redis Role
+    description: The role of the redis cluster nodes.
+    required: true
+    value: redis
+  - name: REDIS_INSTANCE
+    displayName: Redis Instance
+    description: The name of the redis instance
+    required: true
+    value: redis-shared
+  - name: USE_PERSISTENT_QUEUE
+    displayName: Use Persistent Queue
+    description: Use Persistent Queue
+    required: true
+    value: 'false'
+
   - name: IMAGE_NAMESPACE
     displayName: Namespace containing application images.
     required: true
@@ -409,22 +492,27 @@ parameters:
     displayName: Config Mount Path
     description: Location for the config file inside the mediator container
     required: true
-    value: /home/indy/configs/
-  - name: CONFIG_FILE_NAME
-    displayName: Config File Path
+    value: /home/aries/configs/
+  - name: MEDIATOR_CONFIG_FILE_FOLDER
+    displayName: Mediator Argument File Folder
+    required: true
+    description: The folder containing the mediator argument file
+    value: ./configs/
+  - name: MEDIATOR_CONFIG_FILE
+    displayName: Config File Name
     description: Name of the mediator config file
     required: true
     value: mediator-auto-accept.yml
+  - name: PLUGIN_CONFIG_FILE
+    displayName: Config File Name
+    description: Name of the plugin config file
+    required: true
+    value: plugins-config.yml
   - name: CONFIG_MAP_NAME
     displayName: Config Map Name
     description: name of the mediator config map
     required: true
     value: mediator-config
-  - name: MEDIATOR_ARG_FILE
-    displayName: Argument File
-    required: true
-    description: Argument file location
-    value: ./configs/mediator-auto-accept.yml
   - name: INDY_ADMIN_PORT
     displayName: Admin Port
     description: The admin port on which the service will listen.
@@ -520,7 +608,22 @@ parameters:
     displayName: Log Level
     description: Log Level
     required: true
-    value: INFO
+    value: WARNING
+  - name: RUST_LOG
+    displayName: Rust Log Level
+    description: Rust Log Level
+    required: true
+    value: warn
+  - name: ACAPY_PLUGIN
+    displayName: Plugin list
+    description: Plugin list
+    required: false
+    value:
+  - name: ACAPY_PLUGIN_CONFIG
+    displayName: Plugin configuration file
+    description: Plugin configuration file
+    required: false
+    value:
 
   - name: MIN_REPLICAS
     displayName: Minimum Replicas
