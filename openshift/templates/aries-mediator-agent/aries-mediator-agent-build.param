@@ -4,10 +4,11 @@
 # Template File: ../openshift/templates/aries-mediator-agent/aries-mediator-agent-build.yaml
 #=========================================================
 NAME=aries-mediator-agent
+SUFFIX=
 APP_NAME=aries-mediator-service
 GIT_REPO_URL=https://github.com/hyperledger/aries-mediator-service.git
 GIT_REF=main
-SOURCE_CONTEXT_DIR=
-DOCKER_FILE_PATH=./acapy/Dockerfile.acapy
-SOURCE_IMAGE=artifacts.developer.gov.bc.ca/github-docker-remote/hyperledger/aries-cloudagent-python:py3.9-indy-1.16.0-0.8.1
+SOURCE_CONTEXT_DIR=./redis-pq-demo
+DOCKER_FILE_PATH=Dockerfile
+SOURCE_IMAGE=artifacts.developer.gov.bc.ca/github-docker-remote/hyperledger/aries-cloudagent-python:py3.9-0.10.4
 OUTPUT_IMAGE_TAG=latest

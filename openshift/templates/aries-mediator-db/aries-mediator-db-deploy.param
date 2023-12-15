@@ -1,7 +1,7 @@
 #=========================================================
 # OpenShift template parameters for:
 # Component: .
-# Template File: ../openshift/templates/postgresql/postgresql-deploy.yaml
+# Template File: ../openshift/templates/aries-mediator-db/aries-mediator-db-deploy.yaml
 #=========================================================
 NAME=aries-mediator-db
 APP_NAME=aries-mediator-service
