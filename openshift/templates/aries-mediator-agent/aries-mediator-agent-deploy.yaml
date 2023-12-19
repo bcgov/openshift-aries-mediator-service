@@ -136,6 +136,24 @@ objects:
       admin-api-key: ${ADMIN_API_KEY}
     type: Opaque
 
+  - kind: Secret
+    apiVersion: v1
+    metadata:
+      name: ${NAME}${SUFFIX}-firebase-plugin
+      labels:
+        name: ${NAME}${SUFFIX}
+        app: ${APP_NAME}${SUFFIX}
+        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
+        app-group: ${APP_GROUP}
+        role: ${ROLE}
+        env: ${TAG_NAME}
+    stringData:
+      project-id: ${FIREBASE_PROJECT_ID}
+      notification-title: ${FIREBASE_NOTIFICATION_TITLE}
+      notification-body: ${FIREBASE_NOTIFICATION_BODY}
+      service-account: ${FIREBASE_SERVICE_ACCOUNT}
+    type: Opaque
+
   - kind: DeploymentConfig
     apiVersion: v1
     metadata:
@@ -283,6 +301,27 @@ objects:
                   value: ${NAME}${SUFFIX}-inbound-direct-response
                 - name: OUTBOUND_QUEUE
                   value: ${NAME}${SUFFIX}-outbound
+
+                - name: FIREBASE_PROJECT_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}-firebase-plugin
+                      key: project-id
+                - name: FIREBASE_NOTIFICATION_TITLE
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}-firebase-plugin
+                      key: notification-title
+                - name: FIREBASE_NOTIFICATION_BODY
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}-firebase-plugin
+                      key: notification-body
+                - name: FIREBASE_SERVICE_ACCOUNT
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}-firebase-plugin
+                      key: service-account
 
               image: " "
               ports:
@@ -449,6 +488,27 @@ parameters:
     description: Use Persistent Queue
     required: true
     value: 'false'
+
+  - name: FIREBASE_PROJECT_ID
+    displayName: The project Id to use with the firebase plugin
+    description: Firebase Project Id
+    required: false
+    value:
+  - name: FIREBASE_NOTIFICATION_TITLE
+    displayName: The notification title to use with the firebase plugin
+    description: Firebase Notification Title
+    required: false
+    value:
+  - name: FIREBASE_NOTIFICATION_BODY
+    displayName: The notification body to use with the firebase plugin.
+    description: Firebase Notification Body
+    required: false
+    value:
+  - name: FIREBASE_SERVICE_ACCOUNT
+    displayName: The service account information to use with the firebase plugin, in the form of flattened account json.
+    description: Firebase Service Account
+    required: false
+    value:
 
   - name: IMAGE_NAMESPACE
     displayName: Namespace containing application images.
