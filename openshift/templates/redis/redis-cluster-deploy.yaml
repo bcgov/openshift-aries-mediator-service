@@ -8,6 +8,24 @@
 #  - https://gist.github.com/jujaga/7048148a7c960d6a910ff29f33565407
 #  - https://github.com/bcgov/common-service-showcase/wiki/Redis-Troubleshooting
 
+# ==================================================
+# Troubleshooting
+# ==================================================
+# Resync the Redis Cluster
+# --------------------------------------------------
+#  export INSTANCE=<YOURINSTANCE>
+#  export NAMESPACE=<YOURNAMESPACE>
+#  oc get pods -n $NAMESPACE -l statefulset=redis-$INSTANCE -o jsonpath='{range.items[*]}{.status.podIP} 6379 {end}' | xargs -n2 oc exec -n $NAMESPACE -i redis-$INSTANCE-0 -- redis-cli -c CLUSTER MEET
+# --------------------------------------------------
+# Redis Cluster Info
+# --------------------------------------------------
+#  oc exec -n $NAMESPACE -i redis-$INSTANCE-0 -- redis-cli -c CLUSTER INFO
+# --------------------------------------------------
+# Redis Cluster Nodes
+# --------------------------------------------------
+#  oc exec -n $NAMESPACE -i redis-$INSTANCE-0 -- redis-cli -c CLUSTER NODES
+# ==================================================
+
 # TODO List:
 #   - Automate the cluster initialization process:
 #     export INSTANCE=<YOURINSTANCE>
@@ -140,6 +158,18 @@ objects:
             role: ${ROLE}
             statefulset: ${NAME}${INSTANCE_DELIMITER}${INSTANCE}
         spec:
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  labelSelector:
+                    matchExpressions:
+                    - key: app
+                      values:
+                      - ${NAME}${INSTANCE_DELIMITER}${INSTANCE}
+                      operator: In
+                  topologyKey: kubernetes.io/hostname
           containers:
             - name: redis
               image: ${IMAGE_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}

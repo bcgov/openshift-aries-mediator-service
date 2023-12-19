@@ -1,7 +1,7 @@
 #=========================================================
 # OpenShift template parameters for:
 # Component: .
-# Template File: ../openshift/templates/postgresql/postgresql-deploy.yaml
+# Template File: ../openshift/templates/aries-mediator-db/aries-mediator-db-deploy.yaml
 #=========================================================
 # NAME=aries-mediator-db
 # APP_NAME=aries-mediator-service
@@ -22,6 +22,6 @@ TAG_NAME=test
 # PERSISTENT_VOLUME_SIZE=1Gi
 # PERSISTENT_VOLUME_CLASS=netapp-block-standard
 CPU_REQUEST=100m
-CPU_LIMIT=1000m
+CPU_LIMIT=500m
 MEMORY_REQUEST=256Mi
 MEMORY_LIMIT=512Mi
