@@ -6,9 +6,9 @@
 NAME=aries-mediator-agent
 SUFFIX=
 APP_NAME=aries-mediator-service
-GIT_REPO_URL=https://github.com/hyperledger/aries-mediator-service.git
+GIT_REPO_URL=https://github.com/bcgov/openshift-aries-mediator-service.git
 GIT_REF=main
-SOURCE_CONTEXT_DIR=./redis-pq-demo
+SOURCE_CONTEXT_DIR=./openshift/templates/aries-mediator-agent/container
 DOCKER_FILE_PATH=Dockerfile
 SOURCE_IMAGE=artifacts.developer.gov.bc.ca/github-docker-remote/hyperledger/aries-cloudagent-python:py3.9-0.10.4
 OUTPUT_IMAGE_TAG=latest
