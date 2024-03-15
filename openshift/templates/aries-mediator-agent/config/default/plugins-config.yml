@@ -12,7 +12,7 @@ redis_queue:
   outbound:
     # The topic names are overridden by startup settings
     acapy_outbound_topic: "acapy_outbound"
-    mediator_mode: false
+    mediator_mode: true
 
   ### For Event ###
   event:
