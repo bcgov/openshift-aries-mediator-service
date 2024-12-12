@@ -53,8 +53,8 @@ objects:
     stringData:
       webhook-url: ${WEBHOOK_URL}
     type: Opaque
-  - kind: DeploymentConfig
-    apiVersion: v1
+  - kind: Deployment
+    apiVersion: apps/v1
     metadata:
       name: ${NAME}${SUFFIX}
       labels:
@@ -64,10 +64,6 @@ objects:
         app-group: ${APP_GROUP}
         role: ${ROLE}
         env: ${TAG_NAME}
-      annotations:
-        description: Defines how to deploy the application server
-        app.openshift.io/connects-to: >-
-          [{"apiVersion":"apps.openshift.io/v1","kind":"DeploymentConfig","name":"${WALLET_DB_HOST}${SUFFIX}"}]
     spec:
       strategy:
         type: Recreate
@@ -84,7 +80,8 @@ objects:
               name: ${SOURCE_IMAGE_NAME}:${TAG_NAME}
       replicas: 1
       selector:
-        name: ${NAME}${SUFFIX}
+        matchLabels:
+          name: ${NAME}${SUFFIX}
       template:
         metadata:
           name: ${NAME}${SUFFIX}
@@ -111,7 +108,7 @@ objects:
                     path: ${CONFIG_FILE_NAME}
           containers:
             - name: ${NAME}${SUFFIX}
-              image: ""
+              image: image-registry.openshift-image-registry.svc:5000/${IMAGE_NAMESPACE}/${NAME}:${TAG_NAME}
               ports: []
               env:
                 - name: BACKUP_STRATEGY

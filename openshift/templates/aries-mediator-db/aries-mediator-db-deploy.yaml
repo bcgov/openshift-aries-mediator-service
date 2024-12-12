@@ -45,8 +45,8 @@ objects:
           role: ${ROLE}
           app: ${APP_NAME}${SUFFIX}
           env: ${TAG_NAME}
-  - kind: DeploymentConfig
-    apiVersion: v1
+  - kind: Deployment
+    apiVersion: apps/v1
     metadata:
       name: ${NAME}${SUFFIX}
       generation: 1
@@ -78,7 +78,8 @@ objects:
       replicas: 1
       test: false
       selector:
-        name: ${NAME}${SUFFIX}
+        matchLabels:
+          name: ${NAME}${SUFFIX}
       template:
         metadata:
           labels:
@@ -94,7 +95,7 @@ objects:
                 claimName: ${NAME}${SUFFIX}
           containers:
             - name: ${NAME}${SUFFIX}
-              image: ' '
+              image: image-registry.openshift-image-registry.svc:5000/${IMAGE_NAMESPACE}/${NAME}:${TAG_NAME}
               ports:
                 - containerPort: 5432
                   protocol: TCP
@@ -211,7 +212,8 @@ objects:
           port: 5432
           targetPort: 5432
       selector:
-        name: ${NAME}${SUFFIX}
+        matchLabels:
+          name: ${NAME}${SUFFIX}
       type: ClusterIP
       sessionAffinity: None
 parameters:

@@ -104,10 +104,11 @@ objects:
           protocol: TCP
           targetPort: ${{CADDY_AGENT_ADMIN_PORT}}
       selector:
-        name: ${NAME}${SUFFIX}
+        matchLabels:
+          name: ${NAME}${SUFFIX}
 
-  - kind: DeploymentConfig
-    apiVersion: v1
+  - kind: Deployment
+    apiVersion: apps/v1
     metadata:
       name: ${NAME}${SUFFIX}
       labels:
@@ -117,13 +118,9 @@ objects:
         app-group: ${APP_GROUP}
         role: ${ROLE}
         env: ${TAG_NAME}
-      annotations:
-        description: Defines how to deploy the application server
-        app.openshift.io/connects-to: >-
-          [{"apiVersion":"apps.openshift.io/v1","kind":"DeploymentConfig","name":"${AGENT_HOST}${SUFFIX}"}]
     spec:
       strategy:
-        type: Rolling
+        type: RollingUpdate
       triggers:
         - type: ImageChange
           imageChangeParams:
@@ -137,7 +134,8 @@ objects:
         - type: ConfigChange
       replicas: 1
       selector:
-        name: ${NAME}${SUFFIX}
+        matchLabels:
+          name: ${NAME}${SUFFIX}
       template:
         metadata:
           name: ${NAME}${SUFFIX}
@@ -157,7 +155,7 @@ objects:
                     path: ${CONFIG_FILE_NAME}
           containers:
             - name: ${NAME}${SUFFIX}
-              image: " "
+              image: image-registry.openshift-image-registry.svc:5000/${IMAGE_NAMESPACE}/${NAME}:${TAG_NAME}
               ports:
                 - containerPort: ${{CADDY_AGENT_ADMIN_PORT}}
                   protocol: TCP
@@ -217,8 +215,8 @@ objects:
         env: ${TAG_NAME}
     spec:
       scaleTargetRef:
-        apiVersion: apps.openshift.io/v2
-        kind: DeploymentConfig
+        apiVersion: apps/v1
+        kind: Deployment
         name: ${NAME}${SUFFIX}
       minReplicas: ${{MIN_REPLICAS}}
       maxReplicas: ${{MAX_REPLICAS}}
