@@ -9,7 +9,7 @@
 # SUFFIX=
 # ROLE=db
 # AGENT_ROLE=agent
-# BACKUP_ROLE=backup
+# BACKUP=true
 # APP_GROUP=aries-mediator-service
 # IMAGE_NAMESPACE=4a9599-tools
 # SOURCE_IMAGE_NAME=aries-mediator-db

@@ -28,15 +28,6 @@ objects:
                 matchLabels:
                   name: ${NAMESPACE_NAME}
                   environment: ${TAG_NAME}
-            - podSelector:
-                matchLabels:
-                  role: ${BACKUP_ROLE}
-                  app: ${APP_NAME}${SUFFIX}
-                  env: ${TAG_NAME}
-              namespaceSelector:
-                matchLabels:
-                  name: ${NAMESPACE_NAME}
-                  environment: ${TAG_NAME}
           ports:
             - protocol: TCP
               port: 5432
@@ -57,6 +48,7 @@ objects:
         app-group: ${APP_GROUP}
         role: ${ROLE}
         env: ${TAG_NAME}
+        backup: ${BACKUP}
     spec:
       strategy:
         type: Recreate
@@ -87,6 +79,7 @@ objects:
             app-group: ${APP_GROUP}
             role: ${ROLE}
             env: ${TAG_NAME}
+            backup: ${BACKUP}
         spec:
           volumes:
             - name: ${NAME}${SUFFIX}-data
@@ -246,11 +239,12 @@ parameters:
     description: The role of the mediator agent within the application - used for Network Policies
     required: true
     value: agent
-  - name: BACKUP_ROLE
-    displayName: Backup Role
-    description: The role of the backup container - used for Network Policies
+  - name: BACKUP
+    displayName: Backup Target
+    description:
+      allow the backup container access to this pod
     required: true
-    value: backup
+    value: "true"
   - name: APP_GROUP
     displayName: App Group
     description: The name assigned to all of the deployments in this project.
