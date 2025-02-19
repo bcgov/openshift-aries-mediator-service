@@ -17,7 +17,7 @@ PROFILE=${PROFILE:-default}
 CONFIG_MAP_NAME=${CONFIG_MAP_NAME:-mediator-config}
 CONFIG_ROOT=$( dirname "$0" )/config
 OUTPUT_FORMAT=json
-OUTPUT_FILE=${CONFIG_MAP_NAME}-configmap_DeploymentConfig.json
+OUTPUT_FILE=${CONFIG_MAP_NAME}-configmap_Deployment.json
 
 # Generate the config map ...
 generateProfileConfigMap "${PROFILE}" "${DEPLOYMENT_ENV_NAME}" "${CONFIG_MAP_NAME}${SUFFIX}" "${CONFIG_ROOT}" "${OUTPUT_FORMAT}" "${OUTPUT_FILE}"

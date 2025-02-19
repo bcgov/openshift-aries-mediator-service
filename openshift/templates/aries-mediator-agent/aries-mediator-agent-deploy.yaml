@@ -103,7 +103,8 @@ objects:
           protocol: TCP
           targetPort: ${{INDY_AGENT_WS_PORT}}
       selector:
-        name: ${NAME}${SUFFIX}
+        matchLabels:
+          name: ${NAME}${SUFFIX}
 
   - kind: Secret
     apiVersion: v1
@@ -154,8 +155,8 @@ objects:
       service-account: ${FIREBASE_SERVICE_ACCOUNT}
     type: Opaque
 
-  - kind: DeploymentConfig
-    apiVersion: v1
+  - kind: Deployment
+    apiVersion: apps/v1
     metadata:
       name: ${NAME}${SUFFIX}
       labels:
@@ -165,17 +166,13 @@ objects:
         app-group: ${APP_GROUP}
         role: ${ROLE}
         env: ${TAG_NAME}
-      annotations:
-        description: Defines how to deploy the application server
-        app.openshift.io/connects-to: >-
-          [{"apiVersion":"apps.openshift.io/v1","kind":"DeploymentConfig","name":"${WALLET_HOST}${SUFFIX}"},
-          {"apiVersion":"apps.openshift.io/v1","kind":"DeploymentConfig","name":"${API_HOST}${SUFFIX}"}]
     spec:
       replicas: 1
       selector:
-        name: ${NAME}${SUFFIX}
+        matchLabels:
+          name: ${NAME}${SUFFIX}
       strategy:
-        type: Rolling
+        type: RollingUpdate
       template:
         metadata:
           name: ${NAME}${SUFFIX}
@@ -323,7 +320,7 @@ objects:
                       name: ${NAME}${SUFFIX}-firebase-plugin
                       key: service-account
 
-              image: " "
+              image: image-registry.openshift-image-registry.svc:5000/${IMAGE_NAMESPACE}/${NAME}:${TAG_NAME}
               ports:
                 - containerPort: ${{INDY_ADMIN_PORT}}
                   protocol: TCP
@@ -403,8 +400,8 @@ objects:
         env: ${TAG_NAME}
     spec:
       scaleTargetRef:
-        apiVersion: apps.openshift.io/v2
-        kind: DeploymentConfig
+        apiVersion: apps/v1
+        kind: Deployment
         name: ${NAME}${SUFFIX}
       minReplicas: ${{MIN_REPLICAS}}
       maxReplicas: ${{MAX_REPLICAS}}
