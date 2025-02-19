@@ -10,5 +10,5 @@ GIT_REPO_URL=https://github.com/bcgov/openshift-aries-mediator-service.git
 GIT_REF=main
 SOURCE_CONTEXT_DIR=./openshift/templates/aries-mediator-agent/container
 DOCKER_FILE_PATH=Dockerfile
-SOURCE_IMAGE=artifacts.developer.gov.bc.ca/github-docker-remote/hyperledger/aries-cloudagent-python:py3.9-0.10.4
+SOURCE_IMAGE=artifacts.developer.gov.bc.ca/github-docker-remote/openwallet-foundation/acapy-agent:py3.12-1.1.0
 OUTPUT_IMAGE_TAG=latest
