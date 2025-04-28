@@ -287,11 +287,16 @@ objects:
 
                 - name: USE_PERSISTENT_QUEUE
                   value: ${USE_PERSISTENT_QUEUE}
-                - name: REDIS_CONNECTION_STRING
+                - name: REDIS_PASSWORD
                   valueFrom:
                     secretKeyRef:
+                      name: ${REDIS_SECRET}
+                      key: ${REDIS_SECRET_KEY}
+                - name: REDIS_INSTANCE
+                  value:
                       name: ${REDIS_INSTANCE}
-                      key: connection-string
+                - name: REDIS_CONNECTION_STRING
+                  value: ${REDIS_CONNECTION_STRING}
                 - name: INBOUND_QUEUE
                   value: ${NAME}${SUFFIX}-inbound
                 - name: INBOUND_DIRECT_RESPONSE_QUEUE
@@ -469,7 +474,6 @@ parameters:
     description: The role of the nginx proxy within the application - used for Network Policies
     required: true
     value: proxy
-
   - name: REDIS_ROLE
     displayName: Redis Role
     description: The role of the redis cluster nodes.
@@ -480,6 +484,21 @@ parameters:
     description: The name of the redis instance
     required: true
     value: redis-shared
+  - name: REDIS_SECRET
+    displayName: Redis Secret
+    description: The name of the redis secret
+    required: true
+    value: redis-shared
+  - name: REDIS_SECRET_KEY
+    displayName: Redis Secret Key
+    description: The key for the redis password
+    required: true
+    value: password
+  - name: REDIS_CONNECTION_STRING
+    displayName: Redis Connection String
+    description: The connection string for the redis cluster
+    required: true
+    value: redis://default:${REDIS_PASSWORD}@${REDIS_INSTANCE}:6379
   - name: USE_PERSISTENT_QUEUE
     displayName: Use Persistent Queue
     description: Use Persistent Queue
