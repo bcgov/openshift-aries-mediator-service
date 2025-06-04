@@ -290,13 +290,12 @@ objects:
                 - name: REDIS_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: ${REDIS_SECRET}
-                      key: ${REDIS_SECRET_KEY}
+                      name: ${{REDIS_SECRET}}
+                      key: ${{REDIS_SECRET_KEY}}
                 - name: REDIS_INSTANCE
-                  value:
-                      name: ${REDIS_INSTANCE}
+                  value: ${{REDIS_INSTANCE}}
                 - name: REDIS_CONNECTION_STRING
-                  value: ${REDIS_CONNECTION_STRING}
+                  value: ${{REDIS_CONNECTION_STRING}}
                 - name: INBOUND_QUEUE
                   value: ${NAME}${SUFFIX}-inbound
                 - name: INBOUND_DIRECT_RESPONSE_QUEUE
@@ -498,7 +497,7 @@ parameters:
     displayName: Redis Connection String
     description: The connection string for the redis cluster
     required: true
-    value: redis://default:${REDIS_PASSWORD}@${REDIS_INSTANCE}:6379
+    value: redis://default:$(REDIS_PASSWORD)@$(REDIS_INSTANCE):6379
   - name: USE_PERSISTENT_QUEUE
     displayName: Use Persistent Queue
     description: Use Persistent Queue

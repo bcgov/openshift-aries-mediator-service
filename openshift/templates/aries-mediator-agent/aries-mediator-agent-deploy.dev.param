@@ -12,10 +12,10 @@
 # ROLE=agent
 # SERVICE_ROLE=controller
 # REDIS_ROLE=redis
-# REDIS_SECRET=redis-cluster-shared
-# REDIS_SECRET_KEY=redis-password
-# REDIS_INSTANCE=redis-cluster-shared
-# REDIS_CONNECTION_STRING=redis://default:${REDIS_PASSWORD}@${REDIS_INSTANCE}:6379
+REDIS_SECRET=redis-cluster-shared
+REDIS_SECRET_KEY=redis-password
+REDIS_INSTANCE=redis-cluster-shared
+REDIS_CONNECTION_STRING=redis://default:$(REDIS_PASSWORD)@$(REDIS_INSTANCE):6379
 # USE_PERSISTENT_QUEUE=true
 # FIREBASE_PROJECT_ID=
 # FIREBASE_NOTIFICATION_TITLE=
