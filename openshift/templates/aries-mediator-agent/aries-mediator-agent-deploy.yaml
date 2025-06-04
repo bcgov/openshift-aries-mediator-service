@@ -74,9 +74,7 @@ objects:
                   environment: ${TAG_NAME}
       podSelector:
         matchLabels:
-          role: ${REDIS_ROLE}
-          app: ${REDIS_INSTANCE}
-          statefulset: ${REDIS_INSTANCE}
+          app.kubernetes.io/instance: ${REDIS_INSTANCE}
 
   - kind: Service
     apiVersion: v1
