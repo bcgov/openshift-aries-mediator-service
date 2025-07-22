@@ -19,9 +19,9 @@ jobs:
         with:
           context: "./openshift/templates/aries-mediator-agent/container"
           dockerfile: "Dockerfile"
-          image_name: ${{ github.repository_owner}}/aries-mediator-agent
+          image_name: ${{ github.repository_owner }}/aries-mediator-agent
           registry: ghcr.io
-          registry_username: ${{ github.repository_owner}}
+          registry_username: ${{ github.repository_owner }}
           registry_password: ${{ secrets.GITHUB_TOKEN }}
     outputs:
       image_tag: ${{ steps.builder.outputs.image_tag }}
