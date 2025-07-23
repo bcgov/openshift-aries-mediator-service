@@ -12,7 +12,7 @@ inputs:
   dockerfile:
     required: true
     type: string
-    default: "./openshift/templates/aries-mediator-agent/container/Dockerfile"
+    default: "Dockerfile"
   image_name:
     required: true
     type: string
