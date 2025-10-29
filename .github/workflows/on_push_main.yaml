@@ -1,0 +1,28 @@
+name: Build Aries Mediator Agent
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "openshift/templates/aries-mediator-agent/**"
+jobs:
+  build_agent:
+    name: "Build Traction Aca-Py"
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'bcgov'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Aca-Py Image
+        uses: ./.github/actions/build_agent
+        id: builder
+        with:
+          context: "./openshift/templates/aries-mediator-agent/container"
+          dockerfile: "Dockerfile"
+          image_name: ${{ github.repository_owner }}/aries-mediator-agent
+          registry: ghcr.io
+          registry_username: ${{ github.repository_owner }}
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      image_tag: ${{ steps.builder.outputs.image_tag }}
+      image_version: ${{ steps.builder.outputs.image_version }}
