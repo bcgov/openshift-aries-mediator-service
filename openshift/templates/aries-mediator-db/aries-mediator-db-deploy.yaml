@@ -204,8 +204,7 @@ objects:
           port: 5432
           targetPort: 5432
       selector:
-        matchLabels:
-          name: ${NAME}${SUFFIX}
+        name: ${NAME}${SUFFIX}
       type: ClusterIP
       sessionAffinity: None
 parameters:
